@@ -1,6 +1,8 @@
-﻿*.mp4
+*.mp4
 *.webm
 *.mp3
 *.ogg
-videos/
-audio/
+!videos/
+!audio/
+10222355-uhd_4096_2160_25fps.mp4
+Beethoven*
