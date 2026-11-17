@@ -24,6 +24,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://jeremypianolessons.vercel.app"),
   title: "Jeremy Piano Studio · Fun, Modern Piano Lessons in Entebbe",
   description:
     "Friendly 1-on-1 piano classes in Entebbe for kids, teens, and adult beginners. Learn pop, gospel, classical, and playing by ear.",
@@ -32,6 +33,8 @@ export const metadata: Metadata = {
     apple: "/logo.png",
   },
   openGraph: {
+    url: "https://jeremypianolessons.vercel.app",
+    siteName: "Jeremy Piano Studio",
     title: "Jeremy Piano Studio · Piano Lessons for All Ages in Entebbe",
     description:
       "Learn Piano. Love Music. Patient, joyful 1-on-1 piano classes for kids, teens, and adult beginners in Entebbe.",
@@ -39,10 +42,11 @@ export const metadata: Metadata = {
     locale: "en_UG",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1552422535-c45813c61732?w=1200&q=85",
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Jeremy Piano Studio in Entebbe",
+        type: "image/jpeg",
+        alt: "Jeremy Piano Studio · Private Piano Lessons in Entebbe",
       },
     ],
   },
@@ -51,6 +55,7 @@ export const metadata: Metadata = {
     title: "Jeremy Piano Studio · Piano Lessons for All Ages in Entebbe",
     description:
       "Fun, step-by-step 1-on-1 piano lessons for kids, teens, and adult beginners in Entebbe.",
+    images: ["/og-image.jpg"],
   },
 };
 
