@@ -29,7 +29,7 @@ export default function FloatingControls({
     /[^\d]/g,
     ""
   )}?text=${encodeURIComponent(
-    `Hi ${teacherName}! I'd like to book a piano lesson.`
+    `Hi ${teacherName}, I found you on your website and I'd love to learn piano!`
   )}`;
 
   return (

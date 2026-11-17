@@ -50,7 +50,7 @@ export default function BookingSection({
 
   const buildWhatsAppPayload = () => {
     const lines = [
-      `Hi ${profile.teacherName}! I'd like to book a piano lesson.`,
+      `Hi ${profile.teacherName}, I found you on your website and I'd love to learn piano!`,
       `Name: ${name.trim()}`,
       `Phone / WhatsApp: ${phone.trim()}`,
       email.trim() ? `Email: ${email.trim()}` : null,
@@ -131,7 +131,9 @@ export default function BookingSection({
             <div className="space-y-3 pt-1">
               {primaryWaDigits && (
                 <a
-                  href={`https://wa.me/${primaryWaDigits}`}
+                  href={`https://wa.me/${primaryWaDigits}?text=${encodeURIComponent(
+                    `Hi ${profile.teacherName}, I found you on your website and I'd love to learn piano!`
+                  )}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3.5 p-4 rounded-2xl border border-white/10 bg-[#111116] hover:border-emerald-500/50 transition-all group"

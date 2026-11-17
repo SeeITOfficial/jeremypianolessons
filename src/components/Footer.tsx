@@ -33,7 +33,9 @@ export default function Footer({ profile }: FooterProps) {
             <div className="flex flex-wrap gap-2 pt-2">
               {waDigits && (
                 <a
-                  href={`https://wa.me/${waDigits}`}
+                  href={`https://wa.me/${waDigits}?text=${encodeURIComponent(
+                    `Hi ${profile.teacherName}, I found you on your website and I'd love to learn piano!`
+                  )}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#18181F] border border-white/10 hover:border-emerald-500/50 text-xs font-medium text-zinc-200 hover:text-emerald-300 transition-colors"
