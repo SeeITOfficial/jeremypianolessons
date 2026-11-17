@@ -1,28 +1,32 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { Music2, Sparkles, Volume2 } from "lucide-react";
+import { Award, Ear, FileMusic, Hand, Music, Music2, Sparkles, Volume2 } from "lucide-react";
 
 const LEARNING_HIGHLIGHTS = [
   {
-    emoji: "🎹",
+    Icon: Hand,
+    color: "text-indigo-400 bg-indigo-500/15 border-indigo-500/25",
     title: "Comfortable Hands",
-    body: "Natural posture & finger control without tension.",
+    body: "Natural posture and relaxed finger control from day one.",
   },
   {
-    emoji: "👂",
+    Icon: Ear,
+    color: "text-emerald-400 bg-emerald-500/15 border-emerald-500/25",
     title: "Play by Ear",
-    body: "Pick up melodies and worship chords quickly.",
+    body: "Recognize melodies and gospel progressions naturally.",
   },
   {
-    emoji: "🎼",
-    title: "Easy Sheet Reading",
-    body: "Read notes step-by-step with confidence.",
+    Icon: FileMusic,
+    color: "text-amber-400 bg-amber-500/15 border-amber-500/25",
+    title: "Sheet Reading",
+    body: "Read notes step-by-step without guesswork.",
   },
   {
-    emoji: "🌟",
-    title: "Stage Confidence",
-    body: "Perform smoothly for family, school, or church.",
+    Icon: Award,
+    color: "text-rose-400 bg-rose-500/15 border-rose-500/25",
+    title: "Performance Ready",
+    body: "Build steady confidence for home, school, or church.",
   },
 ];
 
@@ -50,10 +54,10 @@ const KEYS: KeyDef[] = [
 ];
 
 const QUICK_PATTERNS = [
-  { label: "✨ Happy Riff", notes: ["C4", "E4", "G4", "C5", "G4", "C5"], gapMs: 160 },
-  { label: "🙌 Worship Chord", notes: ["C4", "E4", "G4", "B4"], gapMs: 55 },
-  { label: "🌟 Dreamy F Maj7", notes: ["F4", "A4", "C5", "E4"], gapMs: 55 },
-  { label: "🎵 Warm Am7", notes: ["A4", "C5", "E4", "G4"], gapMs: 55 },
+  { label: "Warm Riff", notes: ["C4", "E4", "G4", "C5", "G4", "C5"], gapMs: 160 },
+  { label: "Worship Chord", notes: ["C4", "E4", "G4", "B4"], gapMs: 55 },
+  { label: "F Maj7", notes: ["F4", "A4", "C5", "E4"], gapMs: 55 },
+  { label: "Am7", notes: ["A4", "C5", "E4", "G4"], gapMs: 55 },
 ];
 
 export default function CurriculumSection() {
@@ -127,62 +131,69 @@ export default function CurriculumSection() {
   return (
     <section
       id="curriculum"
-      className="py-16 sm:py-24 bg-[#0F172A] text-white relative overflow-hidden"
+      className="py-16 sm:py-24 bg-[#111116] text-white border-t border-white/5 relative overflow-hidden"
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-24 right-0 w-96 h-96 rounded-full bg-indigo-500/20 blur-3xl"
+        className="pointer-events-none absolute -top-24 right-0 w-96 h-96 rounded-full bg-indigo-500/15 blur-[120px]"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-24 left-0 w-80 h-80 rounded-full bg-amber-500/15 blur-3xl"
+        className="pointer-events-none absolute -bottom-24 left-0 w-80 h-80 rounded-full bg-amber-500/10 blur-[120px]"
       />
 
       <div className="max-w-7xl mx-auto px-5 sm:px-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-          {/* Left: Concise Visual Highlights */}
+          {/* Left: Concise Highlights */}
           <div className="lg:col-span-5 space-y-6">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 text-xs font-semibold">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-indigo-300 text-xs font-semibold">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
               <span>Interactive Sound Lab</span>
             </span>
             <h2 className="font-display font-bold text-3xl sm:text-5xl leading-tight">
-              Play your first{" "}
-              <span className="text-amber-400">notes right here</span>
+              Try your first{" "}
+              <span className="text-indigo-400">notes right here</span>
             </h2>
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              Music should feel fun from day one. Tap any key or try a quick
-              chord on the keyboard to hear how lessons start.
+            <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
+              Tap any key or trigger a chord progression below to test the
+              studio soundboard.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
-              {LEARNING_HIGHLIGHTS.map((item) => (
-                <div
-                  key={item.title}
-                  className="rounded-2xl bg-white/5 border border-white/10 p-4"
-                >
-                  <div className="text-xl mb-1.5">{item.emoji}</div>
-                  <h3 className="font-display font-bold text-base text-white">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                    {item.body}
-                  </p>
-                </div>
-              ))}
+              {LEARNING_HIGHLIGHTS.map((item) => {
+                const Icon = item.Icon;
+                return (
+                  <div
+                    key={item.title}
+                    className="rounded-2xl bg-[#18181F] border border-white/10 p-4"
+                  >
+                    <span
+                      className={`w-9 h-9 rounded-xl border flex items-center justify-center mb-3 ${item.color}`}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </span>
+                    <h3 className="font-display font-bold text-base text-white">
+                      {item.title}
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                      {item.body}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
           {/* Right: Playable Soundboard */}
           <div className="lg:col-span-7">
-            <div className="rounded-3xl bg-slate-900/90 border border-white/15 p-5 sm:p-8 shadow-2xl">
+            <div className="rounded-3xl bg-[#18181F] border border-white/15 p-5 sm:p-8 shadow-2xl">
               <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-                <div className="flex items-center gap-2 text-xs font-semibold text-indigo-300">
+                <div className="flex items-center gap-2 text-xs font-semibold text-zinc-300">
                   <Volume2 className="w-4 h-4 text-amber-400" />
-                  <span>Tap a button or play the keys</span>
+                  <span>Tap a preset or play the keyboard</span>
                 </div>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-[11px] font-medium text-slate-200">
-                  <Music2 className="w-3 h-3 text-amber-400" />
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-[11px] font-medium text-zinc-300">
+                  <Music2 className="w-3 h-3 text-indigo-400" />
                   Classical · Gospel · Pop
                 </span>
               </div>
@@ -193,14 +204,15 @@ export default function CurriculumSection() {
                     key={pat.label}
                     type="button"
                     onClick={() => playPattern(pat.notes, pat.gapMs)}
-                    className="px-3.5 py-2 rounded-full bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-400/30 text-xs font-semibold text-white transition-all cursor-pointer shadow-xs"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-indigo-500/20 hover:bg-indigo-500 border border-indigo-400/30 text-xs font-semibold text-indigo-200 hover:text-white transition-all cursor-pointer"
                   >
-                    {pat.label}
+                    <Music className="w-3 h-3" />
+                    <span>{pat.label}</span>
                   </button>
                 ))}
               </div>
 
-              <div className="relative select-none bg-slate-950 p-3 rounded-2xl border border-white/10">
+              <div className="relative select-none bg-[#09090B] p-3 rounded-2xl border border-white/10">
                 <div className="relative grid grid-cols-8 gap-1.5 h-44 sm:h-52">
                   {whiteKeys.map((key) => {
                     const isActive = activeNotes.includes(key.note);
@@ -211,8 +223,8 @@ export default function CurriculumSection() {
                         onPointerDown={() => playTone(key.note, key.freq)}
                         className={`relative rounded-b-xl rounded-t-sm flex items-end justify-center pb-3 text-xs font-mono-meta font-semibold transition-all cursor-pointer ${
                           isActive
-                            ? "bg-amber-300 text-slate-950 translate-y-0.5 shadow-inner"
-                            : "bg-white hover:bg-indigo-50 text-slate-500"
+                            ? "bg-amber-300 text-zinc-950 translate-y-0.5 shadow-inner"
+                            : "bg-zinc-100 hover:bg-white text-zinc-500"
                         }`}
                       >
                         {key.label}
@@ -238,10 +250,10 @@ export default function CurriculumSection() {
                           playTone(bk.note, bk.freq);
                         }}
                         style={{ left: bk.leftPct }}
-                        className={`absolute top-0 w-[8.5%] h-[58%] rounded-b-lg border border-slate-700 shadow-lg z-10 transition-all cursor-pointer ${
+                        className={`absolute top-0 w-[8.5%] h-[58%] rounded-b-lg border border-zinc-700 shadow-lg z-10 transition-all cursor-pointer ${
                           isActive
                             ? "bg-indigo-500 translate-y-0.5"
-                            : "bg-slate-900 hover:bg-slate-800"
+                            : "bg-zinc-900 hover:bg-zinc-800"
                         }`}
                       />
                     );

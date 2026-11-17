@@ -1,18 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --bg-canvas: #ffffff;
-  --bg-soft: #f8fafc;
-  --ink: #0f172a;
-  --muted: #475569;
-  --primary: #4f46e5;
-  --spark-amber: #f59e0b;
-  --spark-mint: #10b981;
-  --spark-coral: #f43f5e;
+  --bg-canvas: #09090b;
+  --bg-surface: #111116;
+  --bg-card: #18181f;
+  --ink: #fafafa;
+  --muted: #a1a1aa;
+  --primary: #6366f1;
 }
 
 html {
   scroll-behavior: smooth;
+  color-scheme: dark;
 }
 
 body {
@@ -36,7 +35,7 @@ body {
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-6px);
+    transform: translateY(-5px);
   }
 }
 

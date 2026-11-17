@@ -3,10 +3,14 @@
 import { useMemo, useState } from "react";
 import {
   ArrowRight,
+  Award,
   CheckCircle2,
   Clock,
+  Headphones,
   MapPin,
+  Music2,
   Sparkles,
+  Users,
   X,
 } from "lucide-react";
 import type { AgeGroup, ClassItem } from "@/lib/types";
@@ -28,31 +32,27 @@ function getTrackTheme(ageGroup: AgeGroup) {
   switch (ageGroup) {
     case "Children":
       return {
-        badge: "bg-rose-100 text-rose-700",
-        accentBorder: "hover:border-rose-300",
-        icon: "🧒",
-        button: "bg-rose-600 hover:bg-rose-700 text-white",
+        badge: "bg-rose-500/15 text-rose-300 border-rose-500/25",
+        accentBorder: "hover:border-rose-500/50",
+        Icon: Users,
       };
     case "Teens":
       return {
-        badge: "bg-indigo-100 text-indigo-700",
-        accentBorder: "hover:border-indigo-300",
-        icon: "🎧",
-        button: "bg-[#4F46E5] hover:bg-[#4338CA] text-white",
+        badge: "bg-indigo-500/15 text-indigo-300 border-indigo-500/25",
+        accentBorder: "hover:border-indigo-500/50",
+        Icon: Headphones,
       };
     case "Adults":
       return {
-        badge: "bg-emerald-100 text-emerald-700",
-        accentBorder: "hover:border-emerald-300",
-        icon: "🎹",
-        button: "bg-emerald-600 hover:bg-emerald-700 text-white",
+        badge: "bg-emerald-500/15 text-emerald-300 border-emerald-500/25",
+        accentBorder: "hover:border-emerald-500/50",
+        Icon: Music2,
       };
     default:
       return {
-        badge: "bg-amber-100 text-amber-800",
-        accentBorder: "hover:border-amber-300",
-        icon: "✨",
-        button: "bg-amber-500 hover:bg-amber-600 text-slate-950",
+        badge: "bg-amber-500/15 text-amber-300 border-amber-500/25",
+        accentBorder: "hover:border-amber-500/50",
+        Icon: Award,
       };
   }
 }
@@ -76,15 +76,15 @@ export default function ClassesSection({
   }, [publishedClasses, activeFilter]);
 
   return (
-    <section id="classes" className="py-16 sm:py-24 bg-[#F8FAFC]">
+    <section id="classes" className="py-16 sm:py-24 bg-[#09090B] border-t border-white/5">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
           <div>
-            <span className="inline-block px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold mb-3">
+            <span className="inline-block px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-indigo-300 text-xs font-semibold mb-3">
               Classes for Everyone
             </span>
-            <h2 className="font-display font-bold text-3xl sm:text-5xl text-slate-900">
-              Pick your starting track
+            <h2 className="font-display font-bold text-3xl sm:text-5xl text-white">
+              Choose your learning track
             </h2>
           </div>
 
@@ -104,8 +104,8 @@ export default function ClassesSection({
                   onClick={() => setActiveFilter(filter)}
                   className={`px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     active
-                      ? "bg-[#4F46E5] text-white shadow-sm"
-                      : "bg-white text-slate-600 border border-slate-200 hover:border-indigo-300"
+                      ? "bg-indigo-500 text-white shadow-md shadow-indigo-500/25"
+                      : "bg-[#18181F] text-zinc-400 border border-white/10 hover:text-white hover:border-white/25"
                   }`}
                 >
                   {filter}
@@ -116,12 +116,12 @@ export default function ClassesSection({
         </div>
 
         {filteredClasses.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center text-slate-600">
+          <div className="bg-[#18181F] rounded-2xl border border-white/10 p-8 text-center text-zinc-400">
             No classes under this filter yet.{" "}
             <button
               type="button"
               onClick={() => setActiveFilter("All")}
-              className="underline text-[#4F46E5] font-semibold cursor-pointer"
+              className="underline text-indigo-400 font-semibold cursor-pointer"
             >
               Show all classes
             </button>
@@ -130,47 +130,48 @@ export default function ClassesSection({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {filteredClasses.map((cls) => {
               const theme = getTrackTheme(cls.ageGroup);
+              const TrackIcon = theme.Icon;
               return (
                 <article
                   key={cls.id}
-                  className={`rounded-3xl bg-white p-6 sm:p-7 border border-slate-200 ${theme.accentBorder} shadow-xs hover:shadow-lg transition-all flex flex-col justify-between`}
+                  className={`rounded-3xl bg-[#111116] p-6 sm:p-7 border border-white/10 ${theme.accentBorder} shadow-lg transition-all flex flex-col justify-between`}
                 >
                   <div>
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                       <div className="flex flex-wrap items-center gap-2">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${theme.badge}`}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-semibold ${theme.badge}`}
                         >
-                          <span>{theme.icon}</span>
+                          <TrackIcon className="w-3.5 h-3.5" />
                           <span>{cls.ageGroup}</span>
                         </span>
-                        <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-medium">
+                        <span className="px-3 py-1 rounded-full bg-white/[0.06] text-zinc-300 text-xs font-medium">
                           {cls.level}
                         </span>
                       </div>
                       {cls.featured && (
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600">
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-300">
                           <Sparkles className="w-3.5 h-3.5" />
                           Popular
                         </span>
                       )}
                     </div>
 
-                    <h3 className="font-display font-bold text-2xl text-slate-900 mb-2">
+                    <h3 className="font-display font-bold text-2xl text-white mb-2">
                       {cls.title}
                     </h3>
 
-                    <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                    <p className="text-sm text-zinc-400 leading-relaxed mb-4">
                       {cls.summary}
                     </p>
 
-                    <div className="flex flex-wrap gap-3 text-xs text-slate-500 pb-4 mb-4 border-b border-slate-100">
+                    <div className="flex flex-wrap gap-3 text-xs text-zinc-400 pb-4 mb-4 border-b border-white/10">
                       <span className="inline-flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5 text-indigo-500" />
+                        <Clock className="w-3.5 h-3.5 text-indigo-400" />
                         {cls.duration}
                       </span>
                       <span className="inline-flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-indigo-500" />
+                        <MapPin className="w-3.5 h-3.5 text-indigo-400" />
                         {cls.format}
                       </span>
                       {cls.priceNote && <span>· {cls.priceNote}</span>}
@@ -180,9 +181,9 @@ export default function ClassesSection({
                       {cls.highlights.slice(0, 3).map((point, idx) => (
                         <li
                           key={idx}
-                          className="flex items-start gap-2 text-sm text-slate-700"
+                          className="flex items-start gap-2 text-sm text-zinc-300"
                         >
-                          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                           <span>{point}</span>
                         </li>
                       ))}
@@ -193,7 +194,7 @@ export default function ClassesSection({
                     <button
                       type="button"
                       onClick={() => onSelectClassForBooking(cls)}
-                      className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${theme.button}`}
+                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-semibold transition-colors cursor-pointer"
                     >
                       <span>Book This Class</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -202,7 +203,7 @@ export default function ClassesSection({
                     <button
                       type="button"
                       onClick={() => setSelectedModalClass(cls)}
-                      className="inline-flex items-center justify-center px-4 py-2.5 rounded-full text-xs font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                      className="inline-flex items-center justify-center px-4 py-2.5 rounded-full text-xs font-semibold border border-white/15 text-zinc-300 hover:bg-white/[0.06] hover:text-white transition-colors cursor-pointer"
                     >
                       Syllabus
                     </button>
@@ -220,39 +221,39 @@ export default function ClassesSection({
           role="dialog"
           aria-modal="true"
           aria-label={selectedModalClass.title}
-          className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={() => setSelectedModalClass(null)}
         >
           <div
-            className="bg-white text-slate-900 rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 shadow-2xl border border-slate-200 relative"
+            className="bg-[#111116] text-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 shadow-2xl border border-white/15 relative"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               type="button"
               aria-label="Close modal"
               onClick={() => setSelectedModalClass(null)}
-              className="absolute top-5 right-5 p-2 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer"
+              className="absolute top-5 right-5 p-2 rounded-full bg-white/10 text-zinc-200 hover:bg-white/20 transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
 
             <div className="flex flex-wrap gap-2 mb-3">
-              <span className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold">
+              <span className="px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-semibold">
                 {selectedModalClass.ageGroup}
               </span>
-              <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-medium">
+              <span className="px-3 py-1 rounded-full bg-white/10 text-zinc-300 text-xs font-medium">
                 {selectedModalClass.level}
               </span>
             </div>
 
-            <h3 className="font-display font-bold text-2xl sm:text-3xl text-slate-900 pr-8 mb-2">
+            <h3 className="font-display font-bold text-2xl sm:text-3xl text-white pr-8 mb-2">
               {selectedModalClass.title}
             </h3>
-            <p className="text-sm text-slate-600 leading-relaxed mb-5">
+            <p className="text-sm text-zinc-400 leading-relaxed mb-5">
               {selectedModalClass.summary}
             </p>
 
-            <div className="flex flex-wrap gap-3 text-xs text-slate-600 bg-slate-50 rounded-xl px-4 py-3 mb-5">
+            <div className="flex flex-wrap gap-3 text-xs text-zinc-300 bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 mb-5">
               <span>{selectedModalClass.duration}</span>
               <span>·</span>
               <span>{selectedModalClass.format}</span>
@@ -266,8 +267,8 @@ export default function ClassesSection({
 
             <ul className="space-y-2.5 mb-7">
               {selectedModalClass.highlights.map((item, i) => (
-                <li key={i} className="flex items-start gap-2.5 text-sm text-slate-800">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                <li key={i} className="flex items-start gap-2.5 text-sm text-zinc-200">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   <span>{item}</span>
                 </li>
               ))}
@@ -280,7 +281,7 @@ export default function ClassesSection({
                 setSelectedModalClass(null);
                 onSelectClassForBooking(target);
               }}
-              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold transition-colors cursor-pointer"
+              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-semibold transition-colors cursor-pointer"
             >
               <span>Book Trial for This Class</span>
               <ArrowRight className="w-4 h-4" />

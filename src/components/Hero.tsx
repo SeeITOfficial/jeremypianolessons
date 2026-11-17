@@ -10,10 +10,10 @@ interface HeroProps {
 }
 
 const AUDIENCE_CHIPS = [
-  { label: "Kids (5–11)", dot: "bg-rose-500" },
-  { label: "Teens (12–17)", dot: "bg-indigo-500" },
-  { label: "Adults (18+)", dot: "bg-emerald-500" },
-  { label: "Zero Experience Welcome", dot: "bg-amber-500" },
+  { label: "Kids (5–11)", dot: "bg-rose-400" },
+  { label: "Teens (12–17)", dot: "bg-indigo-400" },
+  { label: "Adults (18+)", dot: "bg-emerald-400" },
+  { label: "Beginners Welcome", dot: "bg-amber-400" },
 ];
 
 export default function Hero({
@@ -24,47 +24,47 @@ export default function Hero({
   return (
     <section
       id="home"
-      className="relative bg-gradient-to-br from-[#F4F7FF] via-white to-[#FFF8EC] pt-24 sm:pt-28 pb-16 sm:pb-24 overflow-hidden"
+      className="relative bg-[#09090B] text-white pt-28 sm:pt-32 pb-16 sm:pb-24 overflow-hidden"
     >
-      {/* Bright soft background glows */}
+      {/* Subtle studio lighting */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-24 -left-24 w-96 h-96 rounded-full bg-indigo-200/45 blur-3xl"
+        className="pointer-events-none absolute -top-24 -left-24 w-[28rem] h-[28rem] rounded-full bg-indigo-600/20 blur-[120px]"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-1/3 -right-24 w-96 h-96 rounded-full bg-amber-200/45 blur-3xl"
+        className="pointer-events-none bottom-0 -right-24 absolute w-[26rem] h-[26rem] rounded-full bg-amber-500/10 blur-[120px]"
       />
 
       <div className="max-w-7xl mx-auto px-5 sm:px-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
           {/* Left Copy */}
           <div className="lg:col-span-6 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-semibold">
-              <MapPin className="w-3.5 h-3.5 text-indigo-600" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.06] border border-white/10 text-indigo-300 text-xs font-medium">
+              <MapPin className="w-3.5 h-3.5 text-indigo-400" />
               <span>{profile.heroTag}</span>
             </div>
 
-            <h1 className="font-display font-extrabold text-5xl sm:text-6xl lg:text-[4.25rem] leading-[1.02] tracking-tight text-slate-900">
+            <h1 className="font-display font-extrabold text-5xl sm:text-6xl lg:text-[4.35rem] leading-[1.02] tracking-tight text-white">
               {profile.heroTitleLine1}{" "}
               <span className="block mt-1">
                 {profile.heroTitleLine2}{" "}
-                <span className="bg-gradient-to-r from-[#4F46E5] via-[#6366F1] to-[#F59E0B] bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-amber-300 bg-clip-text text-transparent">
                   {profile.heroTitleAccent}
                 </span>
               </span>
             </h1>
 
-            <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl">
+            <p className="text-base sm:text-lg text-zinc-400 leading-relaxed max-w-xl">
               {profile.heroSubtitle}
             </p>
 
-            {/* Friendly audience pills */}
+            {/* Audience pills */}
             <div className="flex flex-wrap gap-2">
               {AUDIENCE_CHIPS.map((chip) => (
                 <span
                   key={chip.label}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 shadow-xs text-xs font-medium text-slate-700"
+                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.05] border border-white/10 text-xs font-medium text-zinc-200"
                 >
                   <span className={`w-2 h-2 rounded-full ${chip.dot}`} />
                   {chip.label}
@@ -75,26 +75,26 @@ export default function Hero({
             <div className="flex flex-col sm:flex-row gap-3 pt-1">
               <a
                 href="#booking"
-                className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold transition-all shadow-lg shadow-indigo-500/25"
+                className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-semibold transition-all shadow-lg shadow-indigo-500/25"
               >
                 <span>Book a Trial Lesson</span>
                 <ArrowRight className="w-4 h-4" />
               </a>
               <a
                 href="#curriculum"
-                className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 text-sm font-semibold transition-all shadow-xs"
+                className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full bg-white/[0.06] hover:bg-white/[0.11] border border-white/15 text-zinc-100 text-sm font-semibold transition-all"
               >
-                <Sparkles className="w-4 h-4 text-amber-500" />
-                <span>Try the Live Piano</span>
+                <Sparkles className="w-4 h-4 text-amber-400" />
+                <span>Try Interactive Piano</span>
               </a>
             </div>
           </div>
 
           {/* Right Video Stage */}
           <div className="lg:col-span-6 relative">
-            <div className="relative rounded-3xl overflow-hidden border-4 border-white bg-slate-900 shadow-2xl shadow-indigo-950/15 aspect-[4/3] sm:aspect-[16/11] lg:aspect-[5/4]">
+            <div className="relative rounded-3xl overflow-hidden border border-white/15 bg-zinc-900 shadow-2xl shadow-black/60 aspect-[4/3] sm:aspect-[16/11] lg:aspect-[5/4]">
               <video
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover opacity-90"
                 autoPlay
                 muted
                 loop
@@ -107,20 +107,20 @@ export default function Hero({
 
               <div
                 aria-hidden="true"
-                className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-slate-950/15"
+                className="absolute inset-0 bg-gradient-to-t from-[#09090B]/90 via-transparent to-[#09090B]/30"
               />
 
-              {/* Top-left floating sparkle pill */}
-              <div className="absolute top-4 left-4 animate-float-slow inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-400 text-slate-950 text-xs font-bold shadow-md">
+              {/* Top-left subtle pill */}
+              <div className="absolute top-4 left-4 animate-float-slow inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#09090B]/80 backdrop-blur-md border border-white/15 text-amber-300 text-xs font-semibold">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Beginner Friendly</span>
+                <span>1-on-1 Coaching</span>
               </div>
 
-              {/* Top-right studio audio toggle */}
+              {/* Top-right audio toggle */}
               <button
                 type="button"
                 onClick={onToggleMusic}
-                className="absolute top-4 right-4 inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-slate-900/75 hover:bg-slate-900 backdrop-blur-md border border-white/20 text-xs font-medium text-white transition-all cursor-pointer"
+                className="absolute top-4 right-4 inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-[#09090B]/80 hover:bg-[#09090B] backdrop-blur-md border border-white/15 text-xs font-medium text-white transition-all cursor-pointer"
               >
                 {isMusicPlaying ? (
                   <>
@@ -134,17 +134,17 @@ export default function Hero({
                   </>
                 ) : (
                   <>
-                    <VolumeX className="w-3.5 h-3.5 text-white/75" />
-                    <span>Play Studio Music</span>
+                    <VolumeX className="w-3.5 h-3.5 text-zinc-400" />
+                    <span>Studio Audio</span>
                   </>
                 )}
               </button>
 
-              {/* Bottom badge + Watch button */}
+              {/* Bottom badge + Watch */}
               <div className="absolute bottom-4 left-4 right-4 sm:bottom-5 sm:left-5 sm:right-5 flex flex-wrap items-end justify-between gap-3">
-                <div className="bg-white/95 backdrop-blur-md text-slate-900 px-4 py-2.5 rounded-2xl shadow-lg">
-                  <div className="text-[10px] font-mono-meta uppercase tracking-[0.14em] text-indigo-600 font-semibold">
-                    1-on-1 Coach · {profile.location}
+                <div className="bg-[#111116]/90 backdrop-blur-md border border-white/15 text-white px-4 py-2.5 rounded-2xl shadow-lg">
+                  <div className="text-[10px] font-mono-meta uppercase tracking-[0.14em] text-indigo-300 font-semibold">
+                    Instructor · {profile.location}
                   </div>
                   <div className="font-display font-bold text-xl sm:text-2xl leading-tight">
                     {profile.teacherName}
@@ -153,7 +153,7 @@ export default function Hero({
 
                 <a
                   href="#videos"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-xs font-semibold text-white transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/20 text-xs font-semibold text-white transition-colors"
                 >
                   <Play className="w-3.5 h-3.5 fill-current" />
                   <span>Watch Clips</span>

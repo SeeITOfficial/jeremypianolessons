@@ -6,49 +6,49 @@ interface AboutSectionProps {
 }
 
 const PILLAR_ICONS = [Heart, Music, Sparkles, Users];
-const PILLAR_COLORS = [
-  "bg-rose-50 text-rose-600",
-  "bg-indigo-50 text-indigo-600",
-  "bg-amber-50 text-amber-600",
-  "bg-emerald-50 text-emerald-600",
+const PILLAR_STYLES = [
+  "bg-rose-500/15 text-rose-400 border-rose-500/20",
+  "bg-indigo-500/15 text-indigo-400 border-indigo-500/20",
+  "bg-amber-500/15 text-amber-400 border-amber-500/20",
+  "bg-emerald-500/15 text-emerald-400 border-emerald-500/20",
 ];
 
 export default function AboutSection({ profile }: AboutSectionProps) {
   return (
-    <section id="about" className="py-16 sm:py-24 bg-white">
+    <section id="about" className="py-16 sm:py-24 bg-[#111116] border-t border-white/5">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-          {/* Left: Concise welcome + visual pillar chips */}
+          {/* Left: Welcome + Pillars */}
           <div className="lg:col-span-7 space-y-5">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold">
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-indigo-300 text-xs font-semibold">
               Meet Your Teacher
             </span>
-            <h2 className="font-display font-bold text-3xl sm:text-5xl text-slate-900 leading-tight">
+            <h2 className="font-display font-bold text-3xl sm:text-5xl text-white leading-tight">
               {profile.aboutHeadline}
             </h2>
-            <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl">
+            <p className="text-base sm:text-lg text-zinc-400 leading-relaxed max-w-2xl">
               {profile.aboutParagraph1}
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
               {profile.pillars.map((pillar, idx) => {
                 const Icon = PILLAR_ICONS[idx % PILLAR_ICONS.length];
-                const color = PILLAR_COLORS[idx % PILLAR_COLORS.length];
+                const style = PILLAR_STYLES[idx % PILLAR_STYLES.length];
                 return (
                   <div
                     key={pillar.title}
-                    className="rounded-2xl bg-slate-50 border border-slate-200/80 p-4 flex items-start gap-3.5 hover:border-indigo-200 transition-colors"
+                    className="rounded-2xl bg-[#18181F] border border-white/10 p-4 flex items-start gap-3.5 hover:border-indigo-500/40 transition-colors"
                   >
                     <span
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color}`}
+                      className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${style}`}
                     >
                       <Icon className="w-5 h-5" />
                     </span>
                     <div>
-                      <h3 className="font-display font-bold text-base text-slate-900">
+                      <h3 className="font-display font-bold text-base text-white">
                         {pillar.title}
                       </h3>
-                      <p className="text-sm text-slate-600 mt-0.5 leading-snug">
+                      <p className="text-sm text-zinc-400 mt-0.5 leading-snug">
                         {pillar.description}
                       </p>
                     </div>
@@ -58,9 +58,9 @@ export default function AboutSection({ profile }: AboutSectionProps) {
             </div>
           </div>
 
-          {/* Right: Photo + Warm Quote */}
+          {/* Right: Photo + Quote */}
           <div className="lg:col-span-5 space-y-4">
-            <div className="rounded-3xl overflow-hidden border border-slate-200 bg-slate-100 aspect-[4/3] shadow-lg">
+            <div className="rounded-3xl overflow-hidden border border-white/10 bg-zinc-900 aspect-[4/3] shadow-2xl">
               <img
                 src={
                   profile.aboutImageUrl ||
@@ -71,11 +71,11 @@ export default function AboutSection({ profile }: AboutSectionProps) {
               />
             </div>
 
-            <div className="rounded-2xl bg-gradient-to-r from-[#4F46E5] to-[#6366F1] text-white p-5 sm:p-6 shadow-md">
-              <p className="font-display font-semibold text-lg sm:text-xl leading-snug">
+            <div className="rounded-2xl bg-gradient-to-br from-indigo-500/20 via-[#18181F] to-[#18181F] border border-indigo-500/30 text-white p-5 sm:p-6">
+              <p className="font-display font-semibold text-lg sm:text-xl leading-snug text-zinc-100">
                 “{profile.aboutQuote}”
               </p>
-              <div className="mt-2 text-xs text-indigo-100 font-medium">
+              <div className="mt-2.5 text-xs text-indigo-300 font-medium">
                 — {profile.teacherName} · {profile.location}
               </div>
             </div>
