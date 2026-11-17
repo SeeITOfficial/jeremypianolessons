@@ -9,7 +9,7 @@ import type { SiteContent } from "@/lib/types";
 export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
-  const [usingDefaultPassword, setUsingDefaultPassword] = useState(false);
+  const [isLocalFallback, setIsLocalFallback] = useState(false);
   const [content, setContent] = useState<SiteContent | null>(null);
   const [persistenceMode, setPersistenceMode] =
     useState<PersistenceMode>("local");
@@ -20,10 +20,10 @@ export default function AdminPage() {
       const authRes = await fetch("/api/auth", { cache: "no-store" });
       const authData = (await authRes.json()) as {
         authenticated: boolean;
-        usingDefaultPassword: boolean;
+        isLocalFallback: boolean;
       };
       setAuthenticated(authData.authenticated);
-      setUsingDefaultPassword(authData.usingDefaultPassword);
+      setIsLocalFallback(Boolean(authData.isLocalFallback));
 
       if (authData.authenticated) {
         const contentRes = await fetch("/api/content", { cache: "no-store" });
@@ -60,7 +60,7 @@ export default function AdminPage() {
   if (!authenticated || !content) {
     return (
       <AdminLogin
-        usingDefaultPassword={usingDefaultPassword}
+        isLocalFallback={isLocalFallback}
         onSuccess={() => void loadState()}
       />
     );

@@ -9,6 +9,7 @@ import {
   ExternalLink,
   GraduationCap,
   HelpCircle,
+  KeyRound,
   LogOut,
   MessageSquareQuote,
   Plus,
@@ -55,6 +56,15 @@ export default function AdminDashboard({
   const [dirty, setDirty] = useState(false);
   const [statusBanner, setStatusBanner] = useState<{
     type: "success" | "warning" | "error";
+    text: string;
+  } | null>(null);
+
+  const [currentPin, setCurrentPin] = useState("");
+  const [newPin, setNewPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [pinSaving, setPinSaving] = useState(false);
+  const [pinMessage, setPinMessage] = useState<{
+    type: "success" | "error";
     text: string;
   } | null>(null);
 
@@ -149,12 +159,65 @@ export default function AdminDashboard({
     }
   };
 
+  const handleChangePin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPinMessage(null);
+
+    if (!/^\d{6}$/.test(currentPin) || !/^\d{6}$/.test(newPin)) {
+      setPinMessage({
+        type: "error",
+        text: "Both Current PIN and New PIN must be 6 digits.",
+      });
+      return;
+    }
+
+    if (newPin !== confirmPin) {
+      setPinMessage({
+        type: "error",
+        text: "New PIN and confirmation do not match.",
+      });
+      return;
+    }
+
+    setPinSaving(true);
+    try {
+      const res = await fetch("/api/auth/pin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPin, newPin }),
+      });
+
+      const data = (await res.json()) as { ok?: boolean; message?: string };
+      if (res.ok && data.ok) {
+        setCurrentPin("");
+        setNewPin("");
+        setConfirmPin("");
+        setPinMessage({
+          type: "success",
+          text: data.message || "Your 6-digit PIN has been updated.",
+        });
+      } else {
+        setPinMessage({
+          type: "error",
+          text: data.message || "Could not update PIN.",
+        });
+      }
+    } catch {
+      setPinMessage({
+        type: "error",
+        text: "Network error while updating PIN.",
+      });
+    } finally {
+      setPinSaving(false);
+    }
+  };
+
   const modeBadge =
-    persistenceMode === "github"
-      ? { label: "GitHub Live Sync", style: "bg-emerald-950/70 text-emerald-300 border-emerald-500/30" }
+    persistenceMode === "cloud"
+      ? { label: "Live Cloud Sync", style: "bg-emerald-950/70 text-emerald-300 border-emerald-500/30" }
       : persistenceMode === "local"
         ? { label: "Local File Mode", style: "bg-amber-950/70 text-amber-300 border-amber-500/30" }
-        : { label: "Export Mode (Add GITHUB_TOKEN for 1-click cloud save)", style: "bg-stone-800 text-stone-300 border-stone-600" };
+        : { label: "Export Mode", style: "bg-stone-800 text-stone-300 border-stone-600" };
 
   const tabs: Array<{ id: AdminTab; label: string; icon: React.ReactNode }> = [
     { id: "classes", label: `Classes (${content.classes.length})`, icon: <GraduationCap className="w-4 h-4" /> },
@@ -1358,6 +1421,98 @@ export default function AdminDashboard({
                 />
               </div>
             </div>
+
+            {/* Security: Change 6-Digit PIN */}
+            <form
+              onSubmit={handleChangePin}
+              className="rounded-2xl bg-white border border-[#C87A53]/25 p-6 space-y-4"
+            >
+              <div className="flex items-start gap-3">
+                <span className="w-10 h-10 rounded-xl bg-[#14110F] text-[#E5A989] flex items-center justify-center shrink-0">
+                  <KeyRound className="w-5 h-5" />
+                </span>
+                <div>
+                  <h3 className="font-serif-display text-2xl">
+                    Studio Security · Change 6-Digit PIN
+                  </h3>
+                  <p className="text-sm text-[#6E5A4F]">
+                    Set your own private 6-digit PIN anytime. It is encrypted privately in the cloud and never stored in source code.
+                  </p>
+                </div>
+              </div>
+
+              {pinMessage && (
+                <div
+                  className={`rounded-xl px-4 py-3 text-sm border ${
+                    pinMessage.type === "success"
+                      ? "bg-emerald-50 border-emerald-200 text-emerald-900"
+                      : "bg-red-50 border-red-200 text-red-900"
+                  }`}
+                >
+                  {pinMessage.text}
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                    Current 6-Digit PIN
+                  </label>
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={currentPin}
+                    onChange={(e) =>
+                      setCurrentPin(e.target.value.replace(/\D/g, "").slice(0, 6))
+                    }
+                    placeholder="••••••"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25 font-mono-meta tracking-[0.25em]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                    New 6-Digit PIN
+                  </label>
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={newPin}
+                    onChange={(e) =>
+                      setNewPin(e.target.value.replace(/\D/g, "").slice(0, 6))
+                    }
+                    placeholder="••••••"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25 font-mono-meta tracking-[0.25em]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                    Confirm New PIN
+                  </label>
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={confirmPin}
+                    onChange={(e) =>
+                      setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, 6))
+                    }
+                    placeholder="••••••"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25 font-mono-meta tracking-[0.25em]"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={pinSaving}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#14110F] hover:bg-[#C87A53] disabled:opacity-60 text-white text-xs font-semibold uppercase tracking-[0.12em] cursor-pointer transition-colors"
+              >
+                <KeyRound className="w-3.5 h-3.5" />
+                <span>{pinSaving ? "Updating PIN..." : "Update 6-Digit PIN"}</span>
+              </button>
+            </form>
 
             {/* Backup & Restore */}
             <div className="rounded-2xl bg-[#F2EAE0] border border-[#C87A53]/25 p-6 flex flex-wrap items-center justify-between gap-4">

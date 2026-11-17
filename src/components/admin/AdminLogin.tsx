@@ -5,34 +5,45 @@ import Link from "next/link";
 import { ArrowLeft, Eye, EyeOff, Lock, Music } from "lucide-react";
 
 interface AdminLoginProps {
-  usingDefaultPassword: boolean;
+  isLocalFallback: boolean;
   onSuccess: () => void;
 }
 
 export default function AdminLogin({
-  usingDefaultPassword,
+  isLocalFallback,
   onSuccess,
 }: AdminLoginProps) {
-  const [passcode, setPasscode] = useState("");
-  const [showPasscode, setShowPasscode] = useState(false);
+  const [pin, setPin] = useState("");
+  const [showPin, setShowPin] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const handlePinChange = (value: string) => {
+    const digitsOnly = value.replace(/\D/g, "").slice(0, 6);
+    setPin(digitsOnly);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (pin.length !== 6) {
+      setError("Please enter your 6-digit PIN.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ passcode }),
+        body: JSON.stringify({ pin }),
       });
 
       if (!res.ok) {
         const data = (await res.json()) as { error?: string };
-        setError(data.error || "Incorrect passcode.");
+        setError(data.error || "Incorrect 6-digit PIN.");
         setLoading(false);
         return;
       }
@@ -65,16 +76,14 @@ export default function AdminLogin({
                 Studio Admin
               </h1>
               <p className="text-xs text-[#FAF6F0]/60">
-                Manage classes, YouTube videos, guides & contact info
+                Enter your 6-digit PIN to manage classes, videos & guides
               </p>
             </div>
           </div>
 
-          {usingDefaultPassword && (
+          {isLocalFallback && (
             <div className="rounded-xl bg-[#C87A53]/15 border border-[#C87A53]/35 px-4 py-3 text-xs text-[#E5A989] leading-relaxed">
-              Default passcode active (<code className="font-mono-meta">jeremy-piano-2026</code>). Set{" "}
-              <code className="font-mono-meta">ADMIN_PASSWORD</code> in your
-              Vercel environment variables before sharing live.
+              Local dev mode (no <code className="font-mono-meta">.env.local</code> PIN set): use <code className="font-mono-meta">000000</code>, then set your own PIN inside Studio Admin.
             </div>
           )}
 
@@ -87,28 +96,32 @@ export default function AdminLogin({
 
             <div>
               <label
-                htmlFor="admin-passcode"
+                htmlFor="admin-pin"
                 className="block text-[11px] font-mono-meta uppercase tracking-[0.14em] text-[#FAF6F0]/70 mb-2"
               >
-                Studio Passcode
+                6-Digit Studio PIN
               </label>
               <div className="relative">
                 <input
-                  id="admin-passcode"
-                  type={showPasscode ? "text" : "password"}
+                  id="admin-pin"
+                  type={showPin ? "text" : "password"}
+                  inputMode="numeric"
+                  pattern="\d{6}"
+                  maxLength={6}
+                  autoComplete="one-time-code"
                   required
-                  value={passcode}
-                  onChange={(e) => setPasscode(e.target.value)}
-                  placeholder="Enter your studio passcode"
-                  className="w-full px-4 py-3.5 pr-11 rounded-xl bg-[#14110F] border border-white/15 focus:border-[#C87A53] focus:outline-none text-[#FAF6F0]"
+                  value={pin}
+                  onChange={(e) => handlePinChange(e.target.value)}
+                  placeholder="••••••"
+                  className="w-full px-4 py-3.5 pr-11 rounded-xl bg-[#14110F] border border-white/15 focus:border-[#C87A53] focus:outline-none text-[#FAF6F0] font-mono-meta text-center text-2xl tracking-[0.45em]"
                 />
                 <button
                   type="button"
-                  aria-label={showPasscode ? "Hide passcode" : "Show passcode"}
-                  onClick={() => setShowPasscode((p) => !p)}
+                  aria-label={showPin ? "Hide PIN" : "Show PIN"}
+                  onClick={() => setShowPin((p) => !p)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[#FAF6F0]/50 hover:text-[#FAF6F0] cursor-pointer"
                 >
-                  {showPasscode ? (
+                  {showPin ? (
                     <EyeOff className="w-4 h-4" />
                   ) : (
                     <Eye className="w-4 h-4" />
@@ -119,11 +132,11 @@ export default function AdminLogin({
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#C87A53] hover:bg-[#B56542] disabled:opacity-60 text-white text-xs font-semibold uppercase tracking-[0.14em] transition-colors cursor-pointer"
+              disabled={loading || pin.length !== 6}
+              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#C87A53] hover:bg-[#B56542] disabled:opacity-50 text-white text-xs font-semibold uppercase tracking-[0.14em] transition-colors cursor-pointer"
             >
               <Lock className="w-3.5 h-3.5" />
-              <span>{loading ? "Signing in..." : "Open Studio Admin"}</span>
+              <span>{loading ? "Verifying PIN..." : "Unlock Studio Admin"}</span>
             </button>
           </form>
         </div>

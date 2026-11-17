@@ -1,36 +1,59 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   createSessionToken,
+  getAuthStatus,
   isAdminAuthenticated,
-  isUsingDefaultPassword,
+  isValidSixDigitPin,
   SESSION_COOKIE_NAME,
-  verifyPasscode,
+  verifyPin,
 } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
-  const authenticated = await isAdminAuthenticated();
+  const [authenticated, status] = await Promise.all([
+    isAdminAuthenticated(),
+    getAuthStatus(),
+  ]);
+
   return NextResponse.json({
     authenticated,
-    usingDefaultPassword: isUsingDefaultPassword(),
+    ...status,
   });
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const body = (await req.json()) as { passcode?: string };
-    const passcode = typeof body.passcode === "string" ? body.passcode : "";
+    const body = (await req.json()) as { pin?: string };
+    const pin = typeof body.pin === "string" ? body.pin.trim() : "";
 
-    if (!verifyPasscode(passcode)) {
+    if (!isValidSixDigitPin(pin)) {
       return NextResponse.json(
-        { error: "Incorrect studio passcode." },
+        { error: "Please enter a valid 6-digit PIN." },
+        { status: 400 }
+      );
+    }
+
+    const result = await verifyPin(pin);
+    if (!result.configured) {
+      return NextResponse.json(
+        { error: "Studio PIN has not been configured on the server yet." },
+        { status: 503 }
+      );
+    }
+
+    if (!result.valid) {
+      return NextResponse.json(
+        { error: "Incorrect 6-digit PIN." },
         { status: 401 }
       );
     }
 
     const token = createSessionToken();
+    const status = await getAuthStatus();
     const res = NextResponse.json({
       authenticated: true,
-      usingDefaultPassword: isUsingDefaultPassword(),
+      ...status,
     });
 
     res.cookies.set(SESSION_COOKIE_NAME, token, {
