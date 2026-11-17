@@ -8,9 +8,14 @@ import {
   ExternalLink,
   Film,
   GraduationCap,
+  Inbox,
   KeyRound,
   LogOut,
+  Mail,
+  MessageCircle,
+  Phone,
   Plus,
+  RefreshCw,
   RotateCcw,
   Save,
   Settings,
@@ -21,6 +26,8 @@ import {
 } from "lucide-react";
 import type {
   AgeGroup,
+  BookingItem,
+  BookingStatus,
   ClassItem,
   SiteContent,
   SkillLevel,
@@ -29,14 +36,23 @@ import type {
 } from "@/lib/types";
 import type { PersistenceMode } from "@/lib/content-store";
 import { extractYouTubeId, getYouTubeThumbnail } from "@/lib/youtube";
+import InstallAdminButton from "./InstallAdminButton";
+
+export interface AlertStatus {
+  emailConfigured: boolean;
+  whatsappConfigured: boolean;
+  webhookConfigured: boolean;
+}
 
 interface AdminDashboardProps {
   initialContent: SiteContent;
+  initialBookings: BookingItem[];
+  initialAlerts: AlertStatus;
   persistenceMode: PersistenceMode;
   onLogout: () => void;
 }
 
-type AdminTab = "classes" | "videos" | "studio";
+type AdminTab = "bookings" | "classes" | "videos" | "studio";
 
 function makeId(prefix: string) {
   return `${prefix}-${Date.now().toString(36)}`;
@@ -72,17 +88,99 @@ function createEmptyVideoDraft(): VideoItem {
 
 export default function AdminDashboard({
   initialContent,
+  initialBookings,
+  initialAlerts,
   persistenceMode,
   onLogout,
 }: AdminDashboardProps) {
   const [content, setContent] = useState<SiteContent>(initialContent);
-  const [activeTab, setActiveTab] = useState<AdminTab>("classes");
+  const [bookings, setBookings] = useState<BookingItem[]>(initialBookings);
+  const [alerts, setAlerts] = useState<AlertStatus>(initialAlerts);
+  const [bookingFilter, setBookingFilter] = useState<"all" | BookingStatus>("all");
+  const [refreshingBookings, setRefreshingBookings] = useState(false);
+  const [activeTab, setActiveTab] = useState<AdminTab>("bookings");
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [statusBanner, setStatusBanner] = useState<{
     type: "success" | "warning" | "error";
     text: string;
   } | null>(null);
+
+  const refreshBookings = async () => {
+    setRefreshingBookings(true);
+    try {
+      const res = await fetch("/api/bookings", { cache: "no-store" });
+      if (res.ok) {
+        const data = (await res.json()) as {
+          bookings?: BookingItem[];
+          alerts?: AlertStatus;
+        };
+        if (Array.isArray(data.bookings)) {
+          setBookings(data.bookings);
+        }
+        if (data.alerts) {
+          setAlerts(data.alerts);
+        }
+      }
+    } catch {
+      setStatusBanner({
+        type: "error",
+        text: "Could not refresh bookings right now.",
+      });
+    } finally {
+      setRefreshingBookings(false);
+    }
+  };
+
+  const handleBookingStatus = async (id: string, status: BookingStatus) => {
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status }),
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { bookings?: BookingItem[] };
+        if (Array.isArray(data.bookings)) {
+          setBookings(data.bookings);
+        }
+      } else {
+        setStatusBanner({
+          type: "error",
+          text: "Could not update booking status.",
+        });
+      }
+    } catch {
+      setStatusBanner({
+        type: "error",
+        text: "Network error while updating booking status.",
+      });
+    }
+  };
+
+  const handleDeleteBooking = async (id: string) => {
+    try {
+      const res = await fetch(`/api/bookings?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { bookings?: BookingItem[] };
+        if (Array.isArray(data.bookings)) {
+          setBookings(data.bookings);
+        }
+      } else {
+        setStatusBanner({
+          type: "error",
+          text: "Could not delete booking.",
+        });
+      }
+    } catch {
+      setStatusBanner({
+        type: "error",
+        text: "Network error while deleting booking.",
+      });
+    }
+  };
 
   // Add Class / Add Video modal state
   const [classDraft, setClassDraft] = useState<ClassItem | null>(null);
@@ -387,7 +485,21 @@ export default function AdminDashboard({
         ? { label: "Local File Mode", style: "bg-amber-950/70 text-amber-300 border-amber-500/30" }
         : { label: "Export Mode", style: "bg-slate-800 text-slate-300 border-slate-600" };
 
+  const newBookingsCount = bookings.filter((b) => b.status === "new").length;
+  const visibleBookings =
+    bookingFilter === "all"
+      ? bookings
+      : bookings.filter((b) => b.status === bookingFilter);
+
   const tabs: Array<{ id: AdminTab; label: string; icon: React.ReactNode }> = [
+    {
+      id: "bookings",
+      label:
+        newBookingsCount > 0
+          ? `Bookings (${newBookingsCount} New)`
+          : `Bookings (${bookings.length})`,
+      icon: <Inbox className="w-4 h-4" />,
+    },
     { id: "classes", label: `Classes (${content.classes.length})`, icon: <GraduationCap className="w-4 h-4" /> },
     { id: "videos", label: `Videos (${content.videos.length})`, icon: <Video className="w-4 h-4" /> },
     { id: "studio", label: "Studio & Contact", icon: <Settings className="w-4 h-4" /> },
@@ -414,6 +526,8 @@ export default function AdminDashboard({
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
+            <InstallAdminButton />
+
             <Link
               href="/"
               target="_blank"
@@ -485,6 +599,277 @@ export default function AdminDashboard({
             <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
             <p>{statusBanner.text}</p>
           </div>
+        )}
+
+        {/* TAB 0: BOOKINGS */}
+        {activeTab === "bookings" && (
+          <section className="space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h2 className="font-display font-bold text-3xl text-slate-900">
+                  Lesson Bookings
+                </h2>
+                <p className="text-sm text-slate-500">
+                  Student requests submitted through the website booking form.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void refreshBookings()}
+                disabled={refreshingBookings}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold uppercase tracking-[0.12em] cursor-pointer shadow-xs"
+              >
+                <RefreshCw
+                  className={`w-3.5 h-3.5 ${refreshingBookings ? "animate-spin" : ""}`}
+                />
+                <span>{refreshingBookings ? "Refreshing..." : "Refresh"}</span>
+              </button>
+            </div>
+
+            {/* Instant Alert Status Summary */}
+            <div className="rounded-2xl bg-white border border-slate-200 p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+              <div className="space-y-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                  Automatic Booking Alerts
+                </p>
+                <p className="text-xs text-slate-600">
+                  Every new form submission saves here immediately and notifies
+                  connected channels:
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border ${
+                    alerts.emailConfigured
+                      ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                      : "bg-slate-100 border-slate-200 text-slate-600"
+                  }`}
+                >
+                  <Mail className="w-3.5 h-3.5" />
+                  <span>
+                    Email Alerts:{" "}
+                    {alerts.emailConfigured ? "Active" : "Needs Setup"}
+                  </span>
+                </span>
+                <span
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border ${
+                    alerts.whatsappConfigured
+                      ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                      : "bg-slate-100 border-slate-200 text-slate-600"
+                  }`}
+                >
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  <span>
+                    WhatsApp Alerts:{" "}
+                    {alerts.whatsappConfigured ? "Active" : "Needs Setup"}
+                  </span>
+                </span>
+              </div>
+            </div>
+
+            {/* Filter Pills */}
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  { id: "all", label: `All (${bookings.length})` },
+                  {
+                    id: "new",
+                    label: `New (${bookings.filter((b) => b.status === "new").length})`,
+                  },
+                  {
+                    id: "contacted",
+                    label: `Contacted (${bookings.filter((b) => b.status === "contacted").length})`,
+                  },
+                  {
+                    id: "scheduled",
+                    label: `Scheduled (${bookings.filter((b) => b.status === "scheduled").length})`,
+                  },
+                  {
+                    id: "archived",
+                    label: `Archived (${bookings.filter((b) => b.status === "archived").length})`,
+                  },
+                ] as const
+              ).map((pill) => {
+                const active = bookingFilter === pill.id;
+                return (
+                  <button
+                    key={pill.id}
+                    type="button"
+                    onClick={() => setBookingFilter(pill.id)}
+                    className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer ${
+                      active
+                        ? "bg-[#4F46E5] text-white"
+                        : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    {pill.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {visibleBookings.length === 0 ? (
+              <div className="rounded-2xl bg-white border border-slate-200 p-10 text-center space-y-2 shadow-xs">
+                <Inbox className="w-8 h-8 text-slate-400 mx-auto" />
+                <p className="font-semibold text-slate-800">
+                  No bookings in this view yet
+                </p>
+                <p className="text-sm text-slate-500">
+                  When a parent or student fills out &ldquo;Request a
+                  Lesson&rdquo; on the website, it will appear right here.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {visibleBookings.map((booking) => {
+                  const cleanDigits = booking.phone.replace(/[^\d]/g, "");
+                  const waReplyHref = cleanDigits
+                    ? `https://wa.me/${cleanDigits}?text=${encodeURIComponent(
+                        `Hello ${booking.name}, thanks for requesting a piano lesson (${booking.classTrack}) with ${content.profile.brandName}! Let's schedule your first session.`
+                      )}`
+                    : null;
+                  const statusBadgeStyle =
+                    booking.status === "new"
+                      ? "bg-indigo-50 border-indigo-200 text-indigo-700"
+                      : booking.status === "contacted"
+                        ? "bg-amber-50 border-amber-200 text-amber-800"
+                        : booking.status === "scheduled"
+                          ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                          : "bg-slate-100 border-slate-200 text-slate-600";
+
+                  return (
+                    <div
+                      key={booking.id}
+                      className="rounded-2xl bg-white border border-slate-200 p-5 sm:p-6 shadow-xs space-y-4"
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-3 pb-3 border-b border-slate-100">
+                        <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-2.5">
+                            <h3 className="font-display font-bold text-xl text-slate-900">
+                              {booking.name}
+                            </h3>
+                            <span
+                              className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-[0.08em] border ${statusBadgeStyle}`}
+                            >
+                              {booking.status}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-500">
+                            {new Date(booking.createdAt).toLocaleString()}
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                          <select
+                            aria-label={`Booking status for ${booking.name}`}
+                            value={booking.status}
+                            onChange={(e) =>
+                              void handleBookingStatus(
+                                booking.id,
+                                e.target.value as BookingStatus
+                              )
+                            }
+                            className="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-xs font-medium text-slate-800 cursor-pointer"
+                          >
+                            <option value="new">New</option>
+                            <option value="contacted">Contacted</option>
+                            <option value="scheduled">Scheduled</option>
+                            <option value="archived">Archived</option>
+                          </select>
+
+                          <button
+                            type="button"
+                            onClick={() => void handleDeleteBooking(booking.id)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 text-xs font-medium cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Delete</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+                        <div className="rounded-xl bg-slate-50 p-3">
+                          <p className="text-[11px] uppercase tracking-[0.1em] text-slate-400 font-semibold">
+                            Class / Track
+                          </p>
+                          <p className="text-slate-800 font-medium mt-0.5">
+                            {booking.classTrack}
+                          </p>
+                        </div>
+                        <div className="rounded-xl bg-slate-50 p-3">
+                          <p className="text-[11px] uppercase tracking-[0.1em] text-slate-400 font-semibold">
+                            Age Group
+                          </p>
+                          <p className="text-slate-800 font-medium mt-0.5">
+                            {booking.ageGroup}
+                          </p>
+                        </div>
+                        <div className="rounded-xl bg-slate-50 p-3">
+                          <p className="text-[11px] uppercase tracking-[0.1em] text-slate-400 font-semibold">
+                            Preferred Time
+                          </p>
+                          <p className="text-slate-800 font-medium mt-0.5">
+                            {booking.preferredTime}
+                          </p>
+                        </div>
+                        <div className="rounded-xl bg-slate-50 p-3">
+                          <p className="text-[11px] uppercase tracking-[0.1em] text-slate-400 font-semibold">
+                            Phone / Email
+                          </p>
+                          <p className="text-slate-800 font-medium mt-0.5 break-all">
+                            {booking.phone}
+                            {booking.email ? ` • ${booking.email}` : ""}
+                          </p>
+                        </div>
+                      </div>
+
+                      {booking.notes && (
+                        <div className="rounded-xl bg-indigo-50/60 border border-indigo-100 px-4 py-3 text-sm text-slate-700">
+                          <span className="font-semibold text-indigo-950">
+                            Notes:{" "}
+                          </span>
+                          {booking.notes}
+                        </div>
+                      )}
+
+                      <div className="flex flex-wrap gap-2.5 pt-1">
+                        {waReplyHref && (
+                          <a
+                            href={waReplyHref}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5" />
+                            <span>Reply on WhatsApp</span>
+                          </a>
+                        )}
+                        <a
+                          href={`tel:${booking.phone.replace(/\s+/g, "")}`}
+                          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors"
+                        >
+                          <Phone className="w-3.5 h-3.5" />
+                          <span>Call Student</span>
+                        </a>
+                        {booking.email && (
+                          <a
+                            href={`mailto:${booking.email}?subject=${encodeURIComponent(
+                              `Your Piano Lesson Request (${booking.classTrack})`
+                            )}`}
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors"
+                          >
+                            <Mail className="w-3.5 h-3.5" />
+                            <span>Send Email</span>
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
         )}
 
         {/* TAB 1: CLASSES */}

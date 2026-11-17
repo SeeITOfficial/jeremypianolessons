@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Check,
   Clock,
-  Copy,
-  ExternalLink,
   Mail,
   MapPin,
   MessageCircle,
@@ -17,13 +15,11 @@ import type { ClassItem, StudioProfile } from "@/lib/types";
 interface BookingSectionProps {
   profile: StudioProfile;
   classes: ClassItem[];
-  preselectedClassTitle?: string;
 }
 
 export default function BookingSection({
   profile,
   classes,
-  preselectedClassTitle = "",
 }: BookingSectionProps) {
   const publishedClasses = classes.filter((c) => c.published);
 
@@ -32,40 +28,19 @@ export default function BookingSection({
   const [email, setEmail] = useState("");
   const [ageGroup, setAgeGroup] = useState("");
   const [selectedClass, setSelectedClass] = useState(
-    preselectedClassTitle || publishedClasses[0]?.title || "Piano Lessons"
+    publishedClasses[0]?.title || "Piano Lessons"
   );
   const [preferredTime, setPreferredTime] = useState("");
   const [notes, setNotes] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [submittedUrl, setSubmittedUrl] = useState<string | null>(null);
-  const [formattedSummary, setFormattedSummary] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [submittedRecord, setSubmittedRecord] = useState<{
+    name: string;
+    classTrack: string;
+    phone: string;
+  } | null>(null);
 
-  useEffect(() => {
-    if (preselectedClassTitle) {
-      setSelectedClass(preselectedClassTitle);
-      setSubmittedUrl(null);
-    }
-  }, [preselectedClassTitle]);
-
-  const buildWhatsAppPayload = () => {
-    const lines = [
-      `Hi ${profile.teacherName}, I found you on your website and I'd love to learn piano!`,
-      `Name: ${name.trim()}`,
-      `Phone / WhatsApp: ${phone.trim()}`,
-      email.trim() ? `Email: ${email.trim()}` : null,
-      ageGroup ? `Student Age Group: ${ageGroup}` : null,
-      selectedClass ? `Class Track: ${selectedClass}` : null,
-      preferredTime.trim()
-        ? `Preferred Days/Times: ${preferredTime.trim()}`
-        : null,
-      notes.trim() ? `Goals / Notes: ${notes.trim()}` : null,
-    ].filter(Boolean);
-
-    return lines.join("\n");
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -74,26 +49,46 @@ export default function BookingSection({
       return;
     }
 
-    const messageText = buildWhatsAppPayload();
-    const waDigits = profile.whatsappPrimary.replace(/[^\d]/g, "");
-    const url = `https://wa.me/${waDigits}?text=${encodeURIComponent(
-      messageText
-    )}`;
+    setSubmitting(true);
 
-    setFormattedSummary(messageText);
-    setSubmittedUrl(url);
-
-    window.open(url, "_blank", "noopener,noreferrer");
-  };
-
-  const handleCopy = async () => {
-    if (!formattedSummary) return;
     try {
-      await navigator.clipboard.writeText(formattedSummary);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          phone: phone.trim(),
+          email: email.trim(),
+          ageGroup,
+          classTrack: selectedClass,
+          preferredTime: preferredTime.trim(),
+          notes: notes.trim(),
+        }),
+      });
+
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok || !data.ok) {
+        setError(
+          data.error || "Could not submit your booking. Please try again."
+        );
+        return;
+      }
+
+      setSubmittedRecord({
+        name: name.trim(),
+        classTrack: selectedClass,
+        phone: phone.trim(),
+      });
+      setName("");
+      setPhone("");
+      setEmail("");
+      setAgeGroup("");
+      setPreferredTime("");
+      setNotes("");
     } catch {
-      // Ignore clipboard failure
+      setError("Network error while sending request. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -113,8 +108,8 @@ export default function BookingSection({
               Book your first trial lesson
             </h2>
             <p className="text-base text-slate-600 leading-relaxed">
-              Send your details below or message {profile.teacherName} directly
-              on WhatsApp — we’ll find a comfortable time slot for you.
+              Submit your lesson request here so {profile.teacherName} can
+              confirm your slot, or reach out directly below.
             </p>
 
             <div className="rounded-2xl bg-white border border-slate-200/90 p-4 space-y-2 text-sm text-slate-700 shadow-xs">
@@ -199,62 +194,40 @@ export default function BookingSection({
                 Request a Lesson
               </h3>
               <p className="text-sm text-slate-500 mt-1 mb-6">
-                Clicking send opens WhatsApp with your details ready for{" "}
-                {profile.teacherName}.
+                Fill in your details below — {profile.teacherName} receives your
+                booking immediately and will reach out to confirm.
               </p>
 
-              {submittedUrl ? (
-                <div className="rounded-2xl bg-[#F8FAFC] border border-slate-200 p-6 space-y-5">
+              {submittedRecord ? (
+                <div className="rounded-2xl bg-[#F8FAFC] border border-emerald-200 p-6 space-y-5">
                   <div className="flex items-start gap-3">
-                    <span className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
                       <Check className="w-5 h-5" />
                     </span>
                     <div>
-                      <h4 className="font-display font-bold text-xl text-slate-900">
-                        Your request is ready
+                      <h4 className="font-display font-bold text-2xl text-slate-900">
+                        Booking request received!
                       </h4>
-                      <p className="text-sm text-slate-600 mt-0.5">
-                        If WhatsApp didn’t open automatically, tap below or copy
-                        your message.
+                      <p className="text-sm text-slate-600 mt-1 leading-relaxed">
+                        Thank you, <strong>{submittedRecord.name}</strong>. Your
+                        request for{" "}
+                        <strong>{submittedRecord.classTrack}</strong> has been
+                        sent to {profile.teacherName}, who will contact you at{" "}
+                        <strong>{submittedRecord.phone}</strong> shortly.
                       </p>
                     </div>
                   </div>
 
-                  <pre className="text-xs font-mono-meta bg-white rounded-xl p-4 whitespace-pre-wrap text-slate-700 border border-slate-200">
-                    {formattedSummary}
-                  </pre>
-
-                  <div className="flex flex-wrap gap-3">
-                    <a
-                      href={submittedUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-[#25D366] hover:bg-[#1EBE5D] text-white text-xs font-semibold transition-colors"
-                    >
-                      <span>Open WhatsApp Chat</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-
-                    <button
-                      type="button"
-                      onClick={handleCopy}
-                      className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-slate-900 text-white text-xs font-semibold cursor-pointer"
-                    >
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>{copied ? "Copied!" : "Copy Details"}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setSubmittedUrl(null)}
-                      className="inline-flex items-center px-4 py-3 rounded-full border border-slate-300 text-slate-700 text-xs font-semibold cursor-pointer"
-                    >
-                      Edit
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSubmittedRecord(null)}
+                    className="inline-flex items-center px-5 py-3 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-xs font-semibold cursor-pointer transition-colors"
+                  >
+                    Submit Another Request
+                  </button>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
                   {error && (
                     <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
                       {error}
@@ -400,9 +373,12 @@ export default function BookingSection({
 
                   <button
                     type="submit"
-                    className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold transition-colors cursor-pointer shadow-lg shadow-indigo-500/20"
+                    disabled={submitting}
+                    className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] disabled:opacity-60 text-white text-sm font-semibold transition-colors cursor-pointer shadow-lg shadow-indigo-500/20"
                   >
-                    <span>Send Request via WhatsApp</span>
+                    <span>
+                      {submitting ? "Sending Request..." : "Submit Booking Request"}
+                    </span>
                     <Send className="w-4 h-4" />
                   </button>
                 </form>

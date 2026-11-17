@@ -84,6 +84,21 @@ export interface StudioProfile {
   pillars: PillarItem[];
 }
 
+export type BookingStatus = "new" | "contacted" | "scheduled" | "archived";
+
+export interface BookingItem {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  ageGroup: string;
+  classTrack: string;
+  preferredTime: string;
+  notes: string;
+  status: BookingStatus;
+  createdAt: string;
+}
+
 export interface SiteContent {
   profile: StudioProfile;
   classes: ClassItem[];

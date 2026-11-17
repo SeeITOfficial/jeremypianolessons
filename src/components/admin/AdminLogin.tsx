@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Eye, EyeOff, Lock } from "lucide-react";
+import InstallAdminButton from "./InstallAdminButton";
 
 interface AdminLoginProps {
   isLocalFallback: boolean;
@@ -58,13 +59,16 @@ export default function AdminLogin({
   return (
     <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-5">
       <div className="w-full max-w-md space-y-6">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-xs font-mono-meta uppercase tracking-[0.14em] text-slate-400 hover:text-indigo-300 transition-colors"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Back to Website</span>
-        </Link>
+        <div className="flex items-center justify-between gap-3">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-xs font-mono-meta uppercase tracking-[0.14em] text-slate-400 hover:text-indigo-300 transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Website</span>
+          </Link>
+          <InstallAdminButton />
+        </div>
 
         <div className="rounded-3xl bg-slate-900 border border-slate-800 p-7 sm:p-9 shadow-2xl space-y-6">
           <div className="flex items-center gap-3.5">
