@@ -2,6 +2,7 @@
 
 import { ArrowRight, MapPin, Play, Sparkles, Volume2, VolumeX } from "lucide-react";
 import type { StudioProfile } from "@/lib/types";
+import { extractYouTubeId } from "@/lib/youtube";
 
 interface HeroProps {
   profile: StudioProfile;
@@ -21,6 +22,11 @@ export default function Hero({
   isMusicPlaying,
   onToggleMusic,
 }: HeroProps) {
+  const customVideoUrl = profile.heroVideoUrl?.trim() || "";
+  const customYouTubeId = customVideoUrl
+    ? extractYouTubeId(customVideoUrl)
+    : null;
+
   return (
     <section
       id="home"
@@ -97,17 +103,37 @@ export default function Hero({
           {/* Right Video Stage */}
           <div className="lg:col-span-6 relative">
             <div className="relative rounded-3xl overflow-hidden border border-white/15 bg-zinc-900 shadow-2xl shadow-black/60 aspect-[4/3] sm:aspect-[16/11] lg:aspect-[5/4]">
-              <video
-                className="w-full h-full object-cover opacity-90"
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="metadata"
-              >
-                <source src="/videos/piano-loop.mp4" type="video/mp4" />
-                <source src="/videos/piano-loop.webm" type="video/webm" />
-              </video>
+              {customYouTubeId ? (
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${customYouTubeId}?autoplay=1&mute=1&loop=1&playlist=${customYouTubeId}&controls=0&playsinline=1&modestbranding=1&rel=0`}
+                  title="Hero studio showcase video"
+                  className="w-full h-full pointer-events-none scale-[1.22]"
+                  allow="autoplay; encrypted-media"
+                />
+              ) : customVideoUrl ? (
+                <video
+                  key={customVideoUrl}
+                  src={customVideoUrl}
+                  className="w-full h-full object-cover opacity-90"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                />
+              ) : (
+                <video
+                  className="w-full h-full object-cover opacity-90"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                >
+                  <source src="/videos/piano-loop.mp4" type="video/mp4" />
+                  <source src="/videos/piano-loop.webm" type="video/webm" />
+                </video>
+              )}
 
               <div
                 aria-hidden="true"

@@ -66,6 +66,7 @@ export interface StudioProfile {
   heroTitleLine2: string;
   heroTitleAccent: string;
   heroSubtitle: string;
+  heroVideoUrl?: string;
   aboutHeadline: string;
   aboutParagraph1: string;
   aboutParagraph2: string;

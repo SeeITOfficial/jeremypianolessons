@@ -2,14 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { upload } from "@vercel/blob/client";
 import {
   CheckCircle2,
   Download,
   ExternalLink,
+  Film,
   GraduationCap,
   KeyRound,
   LogOut,
   Plus,
+  RotateCcw,
   Save,
   Settings,
   Trash2,
@@ -86,6 +89,8 @@ export default function AdminDashboard({
   const [classDraft, setClassDraft] = useState<ClassItem | null>(null);
   const [videoDraft, setVideoDraft] = useState<VideoItem | null>(null);
   const [modalError, setModalError] = useState("");
+  const [heroUploading, setHeroUploading] = useState(false);
+  const [heroUploadPct, setHeroUploadPct] = useState(0);
 
   // Change PIN state
   const [currentPin, setCurrentPin] = useState("");
@@ -156,6 +161,109 @@ export default function AdminDashboard({
   };
 
   const handleSave = () => persistContent(content);
+
+  const handleHeroVideoUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    if (!file.type.startsWith("video/")) {
+      setStatusBanner({
+        type: "error",
+        text: "Please select an MP4, WebM, or MOV video file.",
+      });
+      return;
+    }
+
+    if (file.size > 50 * 1024 * 1024) {
+      setStatusBanner({
+        type: "error",
+        text: "Please keep the hero loop video under 50 MB for fast loading.",
+      });
+      return;
+    }
+
+    setHeroUploading(true);
+    setHeroUploadPct(0);
+    setStatusBanner(null);
+
+    try {
+      let nextHeroUrl = "";
+
+      if (persistenceMode === "cloud") {
+        const ext = file.name.toLowerCase().endsWith(".webm")
+          ? "webm"
+          : file.name.toLowerCase().endsWith(".mov")
+            ? "mov"
+            : "mp4";
+        const blobPath = `studio/hero-video.${ext}`;
+
+        await upload(blobPath, file, {
+          access: "private",
+          handleUploadUrl: "/api/hero-video/upload",
+          multipart: file.size > 4 * 1024 * 1024,
+          onUploadProgress: ({ percentage }) => setHeroUploadPct(Math.round(percentage)),
+        });
+
+        nextHeroUrl = `/api/hero-video?path=${encodeURIComponent(
+          blobPath
+        )}&v=${Date.now()}`;
+      } else {
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await fetch("/api/hero-video/upload", {
+          method: "PUT",
+          body: formData,
+        });
+        const data = (await res.json()) as { url?: string; error?: string };
+        if (!res.ok || !data.url) {
+          throw new Error(data.error || "Upload failed");
+        }
+        nextHeroUrl = data.url;
+        setHeroUploadPct(100);
+      }
+
+      const nextContent: SiteContent = {
+        ...content,
+        profile: {
+          ...content.profile,
+          heroVideoUrl: nextHeroUrl,
+        },
+      };
+      setContent(nextContent);
+      await persistContent(
+        nextContent,
+        "Hero video uploaded and published live!"
+      );
+    } catch (err) {
+      setStatusBanner({
+        type: "error",
+        text:
+          err instanceof Error
+            ? err.message
+            : "Could not upload hero video. Try a smaller MP4 or paste a YouTube link.",
+      });
+    } finally {
+      setHeroUploading(false);
+    }
+  };
+
+  const handleResetHeroVideo = async () => {
+    const nextContent: SiteContent = {
+      ...content,
+      profile: {
+        ...content.profile,
+        heroVideoUrl: "",
+      },
+    };
+    setContent(nextContent);
+    await persistContent(
+      nextContent,
+      "Hero video restored to default piano loop."
+    );
+  };
 
   const handleCreateClass = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -670,7 +778,112 @@ export default function AdminDashboard({
 
         {/* TAB 2: YOUTUBE VIDEOS */}
         {activeTab === "videos" && (
-          <section className="space-y-5">
+          <section className="space-y-8">
+            {/* Hero Showcase Video Manager */}
+            <div className="rounded-2xl bg-white border border-slate-200 p-5 sm:p-6 shadow-xs space-y-5">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <span className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                    <Film className="w-5 h-5" />
+                  </span>
+                  <div>
+                    <h2 className="font-display font-bold text-2xl text-slate-900">
+                      Homepage Hero Video
+                    </h2>
+                    <p className="text-sm text-slate-500">
+                      Swap the main looping video at the top of your website anytime — upload a clip or paste a YouTube / MP4 link.
+                    </p>
+                  </div>
+                </div>
+
+                {content.profile.heroVideoUrl?.trim() && (
+                  <button
+                    type="button"
+                    onClick={() => void handleResetHeroVideo()}
+                    disabled={saving || heroUploading}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700 cursor-pointer"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Reset to Default</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                <div className="lg:col-span-5">
+                  <div className="aspect-video rounded-2xl overflow-hidden bg-slate-900 border border-slate-200">
+                    {content.profile.heroVideoUrl?.trim() &&
+                    extractYouTubeId(content.profile.heroVideoUrl) ? (
+                      <iframe
+                        src={`https://www.youtube-nocookie.com/embed/${extractYouTubeId(
+                          content.profile.heroVideoUrl
+                        )}?autoplay=0&mute=1&controls=1&rel=0`}
+                        title="Homepage hero video preview"
+                        className="w-full h-full"
+                      />
+                    ) : (
+                      <video
+                        key={content.profile.heroVideoUrl || "default-hero"}
+                        src={
+                          content.profile.heroVideoUrl?.trim() ||
+                          "/videos/piano-loop.mp4"
+                        }
+                        className="w-full h-full object-cover"
+                        muted
+                        loop
+                        playsInline
+                        controls
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div className="lg:col-span-7 space-y-4">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <label className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-xs font-semibold uppercase tracking-[0.1em] cursor-pointer shadow-xs">
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>
+                        {heroUploading
+                          ? `Uploading ${heroUploadPct}%...`
+                          : "Upload Video (.mp4 / .webm)"}
+                      </span>
+                      <input
+                        type="file"
+                        accept="video/mp4,video/webm,video/quicktime"
+                        disabled={heroUploading}
+                        onChange={(e) => void handleHeroVideoUpload(e)}
+                        className="hidden"
+                      />
+                    </label>
+                    <span className="text-xs text-slate-500">
+                      Best under 50 MB (short 5–20s muted clips load fastest).
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
+                      Or Paste YouTube / Direct Video URL (leave blank for default)
+                    </label>
+                    <input
+                      type="url"
+                      value={content.profile.heroVideoUrl || ""}
+                      onChange={(e) =>
+                        updateContent((prev) => ({
+                          ...prev,
+                          profile: {
+                            ...prev.profile,
+                            heroVideoUrl: e.target.value,
+                          },
+                        }))
+                      }
+                      placeholder="https://www.youtube.com/watch?v=... or https://.../video.mp4"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <h2 className="font-display font-bold text-3xl text-slate-900">

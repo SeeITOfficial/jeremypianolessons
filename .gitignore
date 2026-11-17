@@ -25,6 +25,7 @@ next-env.d.ts
 *.ogg
 !public/videos/
 !public/videos/*
+public/videos/custom-hero.*
 !public/audio/
 !public/audio/*
 10222355-uhd_4096_2160_25fps.mp4
