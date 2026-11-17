@@ -3,30 +3,25 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  BookOpen,
   CheckCircle2,
   Download,
   ExternalLink,
   GraduationCap,
-  HelpCircle,
   KeyRound,
   LogOut,
-  MessageSquareQuote,
   Plus,
   Save,
   Settings,
   Trash2,
   Upload,
   Video,
+  X,
 } from "lucide-react";
 import type {
   AgeGroup,
-  ArticleItem,
   ClassItem,
-  FaqItem,
   SiteContent,
   SkillLevel,
-  TestimonialItem,
   VideoCategory,
   VideoItem,
 } from "@/lib/types";
@@ -39,10 +34,38 @@ interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-type AdminTab = "classes" | "videos" | "articles" | "reviews" | "studio";
+type AdminTab = "classes" | "videos" | "studio";
 
 function makeId(prefix: string) {
   return `${prefix}-${Date.now().toString(36)}`;
+}
+
+function createEmptyClassDraft(): ClassItem {
+  return {
+    id: makeId("class"),
+    title: "",
+    ageGroup: "All Ages",
+    level: "Beginner",
+    duration: "60 min",
+    format: "In-Person · Entebbe",
+    priceNote: "1-on-1 Coaching",
+    summary: "",
+    highlights: ["Foundational technique", "Songs tailored to your goals"],
+    featured: false,
+    published: true,
+  };
+}
+
+function createEmptyVideoDraft(): VideoItem {
+  return {
+    id: makeId("vid"),
+    title: "",
+    youtubeUrl: "",
+    category: "Tutorial",
+    duration: "5 min",
+    description: "",
+    published: true,
+  };
 }
 
 export default function AdminDashboard({
@@ -59,6 +82,12 @@ export default function AdminDashboard({
     text: string;
   } | null>(null);
 
+  // Add Class / Add Video modal state
+  const [classDraft, setClassDraft] = useState<ClassItem | null>(null);
+  const [videoDraft, setVideoDraft] = useState<VideoItem | null>(null);
+  const [modalError, setModalError] = useState("");
+
+  // Change PIN state
   const [currentPin, setCurrentPin] = useState("");
   const [newPin, setNewPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
@@ -74,7 +103,10 @@ export default function AdminDashboard({
     setStatusBanner(null);
   };
 
-  const handleSave = async () => {
+  const persistContent = async (
+    nextContent: SiteContent,
+    successText?: string
+  ): Promise<boolean> => {
     setSaving(true);
     setStatusBanner(null);
 
@@ -82,7 +114,7 @@ export default function AdminDashboard({
       const res = await fetch("/api/content", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ content: nextContent }),
       });
 
       const data = (await res.json()) as {
@@ -97,9 +129,12 @@ export default function AdminDashboard({
         setDirty(false);
         setStatusBanner({
           type: "success",
-          text: data.message || "Changes saved and published.",
+          text: successText || data.message || "Changes saved and published.",
         });
+        return true;
       } else {
+        setContent(nextContent);
+        setDirty(true);
         setStatusBanner({
           type: res.status === 409 ? "warning" : "error",
           text:
@@ -107,15 +142,82 @@ export default function AdminDashboard({
             data.error ||
             "Could not save remotely. Use Export JSON to download your changes.",
         });
+        return false;
       }
     } catch {
       setStatusBanner({
         type: "error",
         text: "Network error while saving.",
       });
+      return false;
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleSave = () => persistContent(content);
+
+  const handleCreateClass = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!classDraft) return;
+    setModalError("");
+
+    if (!classDraft.title.trim()) {
+      setModalError("Please enter a class title.");
+      return;
+    }
+
+    const cleaned: ClassItem = {
+      ...classDraft,
+      title: classDraft.title.trim(),
+      summary:
+        classDraft.summary.trim() ||
+        "Personalised 1-on-1 piano coaching tailored to your pace.",
+      highlights: classDraft.highlights
+        .map((h) => h.trim())
+        .filter(Boolean),
+    };
+
+    const nextContent: SiteContent = {
+      ...content,
+      classes: [cleaned, ...content.classes],
+    };
+
+    setContent(nextContent);
+    setClassDraft(null);
+    await persistContent(nextContent, `Added "${cleaned.title}" and published live.`);
+  };
+
+  const handleCreateVideo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!videoDraft) return;
+    setModalError("");
+
+    if (!videoDraft.title.trim()) {
+      setModalError("Please enter a video title.");
+      return;
+    }
+
+    if (videoDraft.youtubeUrl.trim() && !extractYouTubeId(videoDraft.youtubeUrl)) {
+      setModalError("That doesn't look like a valid YouTube link.");
+      return;
+    }
+
+    const cleaned: VideoItem = {
+      ...videoDraft,
+      title: videoDraft.title.trim(),
+      youtubeUrl: videoDraft.youtubeUrl.trim(),
+      description: videoDraft.description.trim(),
+    };
+
+    const nextContent: SiteContent = {
+      ...content,
+      videos: [cleaned, ...content.videos],
+    };
+
+    setContent(nextContent);
+    setVideoDraft(null);
+    await persistContent(nextContent, `Added "${cleaned.title}" and published live.`);
   };
 
   const handleExportJson = () => {
@@ -217,15 +319,16 @@ export default function AdminDashboard({
       ? { label: "Live Cloud Sync", style: "bg-emerald-950/70 text-emerald-300 border-emerald-500/30" }
       : persistenceMode === "local"
         ? { label: "Local File Mode", style: "bg-amber-950/70 text-amber-300 border-amber-500/30" }
-        : { label: "Export Mode", style: "bg-stone-800 text-stone-300 border-stone-600" };
+        : { label: "Export Mode", style: "bg-slate-800 text-slate-300 border-slate-600" };
 
   const tabs: Array<{ id: AdminTab; label: string; icon: React.ReactNode }> = [
     { id: "classes", label: `Classes (${content.classes.length})`, icon: <GraduationCap className="w-4 h-4" /> },
     { id: "videos", label: `Videos (${content.videos.length})`, icon: <Video className="w-4 h-4" /> },
-    { id: "articles", label: `Guides (${content.articles.length})`, icon: <BookOpen className="w-4 h-4" /> },
-    { id: "reviews", label: "Reviews & FAQ", icon: <MessageSquareQuote className="w-4 h-4" /> },
     { id: "studio", label: "Studio & Contact", icon: <Settings className="w-4 h-4" /> },
   ];
+
+  const draftYtId = videoDraft ? extractYouTubeId(videoDraft.youtubeUrl) : null;
+  const draftThumb = videoDraft ? getYouTubeThumbnail(videoDraft.youtubeUrl) : null;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900">
@@ -256,7 +359,7 @@ export default function AdminDashboard({
 
             <button
               type="button"
-              onClick={handleSave}
+              onClick={() => void handleSave()}
               disabled={saving}
               className={`inline-flex items-center gap-2 px-5 py-2 rounded-full text-xs font-semibold uppercase tracking-[0.12em] transition-colors cursor-pointer ${
                 dirty
@@ -323,33 +426,20 @@ export default function AdminDashboard({
           <section className="space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h2 className="font-serif-display text-3xl">Classes & Programs</h2>
-                <p className="text-sm text-[#6E5A4F]">
-                  Add, edit, or hide classes shown on the public website and booking dropdown.
+                <h2 className="font-display font-bold text-3xl text-slate-900">
+                  Classes & Programs
+                </h2>
+                <p className="text-sm text-slate-500">
+                  Manage classes displayed on the website and booking form.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => {
-                  const newClass: ClassItem = {
-                    id: makeId("class"),
-                    title: "New Piano Class",
-                    ageGroup: "All Ages",
-                    level: "Beginner",
-                    duration: "60 min / session",
-                    format: "In-Person · Entebbe",
-                    priceNote: "1-on-1 Coaching",
-                    summary: "Describe what students will learn in this class.",
-                    highlights: ["Foundational technique", "Songs tailored to your goals"],
-                    featured: false,
-                    published: true,
-                  };
-                  updateContent((prev) => ({
-                    ...prev,
-                    classes: [...prev.classes, newClass],
-                  }));
+                  setModalError("");
+                  setClassDraft(createEmptyClassDraft());
                 }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#14110F] hover:bg-[#C87A53] text-white text-xs font-semibold uppercase tracking-[0.12em] cursor-pointer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-xs font-semibold uppercase tracking-[0.12em] cursor-pointer shadow-sm"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Class</span>
@@ -360,10 +450,10 @@ export default function AdminDashboard({
               {content.classes.map((cls, index) => (
                 <div
                   key={cls.id}
-                  className="rounded-2xl bg-white border border-[#C87A53]/25 p-5 sm:p-6 shadow-sm space-y-4"
+                  className="rounded-2xl bg-white border border-slate-200 p-5 sm:p-6 shadow-xs space-y-4"
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#F2EAE0]">
-                    <span className="font-mono-meta text-xs uppercase tracking-[0.14em] text-[#A65C38]">
+                  <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                    <span className="font-mono-meta text-xs uppercase tracking-[0.14em] text-indigo-600 font-semibold">
                       Class #{index + 1}
                     </span>
                     <div className="flex flex-wrap items-center gap-4">
@@ -382,7 +472,7 @@ export default function AdminDashboard({
                             }))
                           }
                         />
-                        <span>Featured Dark Card</span>
+                        <span>Popular Badge</span>
                       </label>
 
                       <label className="inline-flex items-center gap-2 text-xs font-medium cursor-pointer">
@@ -421,7 +511,7 @@ export default function AdminDashboard({
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="md:col-span-2">
-                      <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                      <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                         Class Title
                       </label>
                       <input
@@ -435,12 +525,12 @@ export default function AdminDashboard({
                             ),
                           }))
                         }
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                      <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                         Age Group
                       </label>
                       <select
@@ -455,7 +545,7 @@ export default function AdminDashboard({
                             ),
                           }))
                         }
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                       >
                         <option value="Children">Children</option>
                         <option value="Teens">Teens</option>
@@ -465,7 +555,7 @@ export default function AdminDashboard({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                      <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                         Level
                       </label>
                       <select
@@ -480,7 +570,7 @@ export default function AdminDashboard({
                             ),
                           }))
                         }
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                       >
                         <option value="Beginner">Beginner</option>
                         <option value="Intermediate">Intermediate</option>
@@ -490,7 +580,7 @@ export default function AdminDashboard({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                      <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                         Duration
                       </label>
                       <input
@@ -504,13 +594,13 @@ export default function AdminDashboard({
                             ),
                           }))
                         }
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
-                        Format & Pricing Note
+                      <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
+                        Format
                       </label>
                       <input
                         type="text"
@@ -523,14 +613,14 @@ export default function AdminDashboard({
                             ),
                           }))
                         }
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                      <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                         Summary
                       </label>
                       <textarea
@@ -544,12 +634,12 @@ export default function AdminDashboard({
                             ),
                           }))
                         }
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                      <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                         Syllabus Highlights (one bullet per line)
                       </label>
                       <textarea
@@ -568,7 +658,7 @@ export default function AdminDashboard({
                             ),
                           }))
                         }
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                       />
                     </div>
                   </div>
@@ -583,29 +673,20 @@ export default function AdminDashboard({
           <section className="space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h2 className="font-serif-display text-3xl">YouTube Videos</h2>
-                <p className="text-sm text-[#6E5A4F]">
-                  Paste any YouTube link (watch, share, or Shorts) — thumbnails and embedded playback work automatically without storage buckets.
+                <h2 className="font-display font-bold text-3xl text-slate-900">
+                  YouTube Videos
+                </h2>
+                <p className="text-sm text-slate-500">
+                  Paste any YouTube link — thumbnails and embedded playback work automatically.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => {
-                  const nextVid: VideoItem = {
-                    id: makeId("vid"),
-                    title: "New Piano Lesson Video",
-                    youtubeUrl: "",
-                    category: "Tutorial",
-                    duration: "5 min",
-                    description: "Short description of what students learn in this video.",
-                    published: true,
-                  };
-                  updateContent((prev) => ({
-                    ...prev,
-                    videos: [...prev.videos, nextVid],
-                  }));
+                  setModalError("");
+                  setVideoDraft(createEmptyVideoDraft());
                 }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#14110F] hover:bg-[#C87A53] text-white text-xs font-semibold uppercase tracking-[0.12em] cursor-pointer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-xs font-semibold uppercase tracking-[0.12em] cursor-pointer shadow-sm"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Video</span>
@@ -620,10 +701,10 @@ export default function AdminDashboard({
                 return (
                   <div
                     key={vid.id}
-                    className="rounded-2xl bg-white border border-[#C87A53]/25 p-5 sm:p-6 shadow-sm grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
+                    className="rounded-2xl bg-white border border-slate-200 p-5 sm:p-6 shadow-xs grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
                   >
                     <div className="lg:col-span-4 space-y-2">
-                      <div className="aspect-video rounded-xl overflow-hidden bg-[#14110F] border border-[#C87A53]/20 flex items-center justify-center">
+                      <div className="aspect-video rounded-xl overflow-hidden bg-slate-900 border border-slate-200 flex items-center justify-center">
                         {thumb ? (
                           <img
                             src={thumb}
@@ -631,12 +712,12 @@ export default function AdminDashboard({
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <div className="text-center p-4 text-xs text-[#FAF6F0]/60">
+                          <div className="text-center p-4 text-xs text-slate-400">
                             Paste a YouTube link to preview thumbnail
                           </div>
                         )}
                       </div>
-                      <div className="text-[11px] font-mono-meta text-[#6E5A4F]">
+                      <div className="text-[11px] font-mono-meta text-slate-500">
                         {vid.youtubeUrl.trim()
                           ? ytId
                             ? `Detected YouTube ID: ${ytId}`
@@ -682,7 +763,7 @@ export default function AdminDashboard({
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="sm:col-span-2">
-                          <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                          <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                             YouTube URL
                           </label>
                           <input
@@ -699,12 +780,12 @@ export default function AdminDashboard({
                               }))
                             }
                             placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                           />
                         </div>
 
                         <div className="sm:col-span-2">
-                          <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                          <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                             Video Title
                           </label>
                           <input
@@ -720,12 +801,12 @@ export default function AdminDashboard({
                                 ),
                               }))
                             }
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                          <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                             Category
                           </label>
                           <select
@@ -743,7 +824,7 @@ export default function AdminDashboard({
                                 ),
                               }))
                             }
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                           >
                             <option value="Tutorial">Tutorial</option>
                             <option value="Practice Tip">Practice Tip</option>
@@ -753,7 +834,7 @@ export default function AdminDashboard({
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                          <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                             Duration Label
                           </label>
                           <input
@@ -769,12 +850,12 @@ export default function AdminDashboard({
                                 ),
                               }))
                             }
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                           />
                         </div>
 
                         <div className="sm:col-span-2">
-                          <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                          <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                             Description
                           </label>
                           <textarea
@@ -790,7 +871,7 @@ export default function AdminDashboard({
                                 ),
                               }))
                             }
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                           />
                         </div>
                       </div>
@@ -802,427 +883,22 @@ export default function AdminDashboard({
           </section>
         )}
 
-        {/* TAB 3: ARTICLES & GUIDES */}
-        {activeTab === "articles" && (
-          <section className="space-y-5">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <h2 className="font-serif-display text-3xl">Practice Guides & Articles</h2>
-                <p className="text-sm text-[#6E5A4F]">
-                  Write helpful articles for students and parents. Each guide opens in a clean reader modal.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  const nextArticle: ArticleItem = {
-                    id: makeId("guide"),
-                    title: "New Piano Practice Guide",
-                    category: "Practice Tips",
-                    readTime: "3 min read",
-                    excerpt: "Short summary shown on the guide card.",
-                    coverImage:
-                      "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=900&q=85",
-                    content: [
-                      "First paragraph of your guide.",
-                      "Second paragraph with practical advice.",
-                    ],
-                    published: true,
-                  };
-                  updateContent((prev) => ({
-                    ...prev,
-                    articles: [...prev.articles, nextArticle],
-                  }));
-                }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#14110F] hover:bg-[#C87A53] text-white text-xs font-semibold uppercase tracking-[0.12em] cursor-pointer"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Add Guide</span>
-              </button>
-            </div>
-
-            <div className="space-y-5">
-              {content.articles.map((art) => (
-                <div
-                  key={art.id}
-                  className="rounded-2xl bg-white border border-[#C87A53]/25 p-5 sm:p-6 shadow-sm space-y-4"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#F2EAE0]">
-                    <label className="inline-flex items-center gap-2 text-xs font-medium cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={art.published}
-                        onChange={(e) =>
-                          updateContent((prev) => ({
-                            ...prev,
-                            articles: prev.articles.map((item) =>
-                              item.id === art.id
-                                ? { ...item, published: e.target.checked }
-                                : item
-                            ),
-                          }))
-                        }
-                      />
-                      <span>Published</span>
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateContent((prev) => ({
-                          ...prev,
-                          articles: prev.articles.filter((item) => item.id !== art.id),
-                        }))
-                      }
-                      className="inline-flex items-center gap-1 text-xs text-red-600 hover:text-red-800 cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span>Remove</span>
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="md:col-span-2">
-                      <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
-                        Title
-                      </label>
-                      <input
-                        type="text"
-                        value={art.title}
-                        onChange={(e) =>
-                          updateContent((prev) => ({
-                            ...prev,
-                            articles: prev.articles.map((item) =>
-                              item.id === art.id ? { ...item, title: e.target.value } : item
-                            ),
-                          }))
-                        }
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
-                        Category
-                      </label>
-                      <input
-                        type="text"
-                        value={art.category}
-                        onChange={(e) =>
-                          updateContent((prev) => ({
-                            ...prev,
-                            articles: prev.articles.map((item) =>
-                              item.id === art.id ? { ...item, category: e.target.value } : item
-                            ),
-                          }))
-                        }
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
-                        Read Time
-                      </label>
-                      <input
-                        type="text"
-                        value={art.readTime}
-                        onChange={(e) =>
-                          updateContent((prev) => ({
-                            ...prev,
-                            articles: prev.articles.map((item) =>
-                              item.id === art.id ? { ...item, readTime: e.target.value } : item
-                            ),
-                          }))
-                        }
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
-                      />
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
-                        Cover Image URL
-                      </label>
-                      <input
-                        type="url"
-                        value={art.coverImage}
-                        onChange={(e) =>
-                          updateContent((prev) => ({
-                            ...prev,
-                            articles: prev.articles.map((item) =>
-                              item.id === art.id ? { ...item, coverImage: e.target.value } : item
-                            ),
-                          }))
-                        }
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
-                      Short Excerpt
-                    </label>
-                    <input
-                      type="text"
-                      value={art.excerpt}
-                      onChange={(e) =>
-                        updateContent((prev) => ({
-                          ...prev,
-                          articles: prev.articles.map((item) =>
-                            item.id === art.id ? { ...item, excerpt: e.target.value } : item
-                          ),
-                        }))
-                      }
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
-                      Full Article Body (separate paragraphs with a blank line)
-                    </label>
-                    <textarea
-                      rows={5}
-                      value={art.content.join("\n\n")}
-                      onChange={(e) =>
-                        updateContent((prev) => ({
-                          ...prev,
-                          articles: prev.articles.map((item) =>
-                            item.id === art.id
-                              ? {
-                                  ...item,
-                                  content: e.target.value.split(/\n\s*\n/),
-                                }
-                              : item
-                          ),
-                        }))
-                      }
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* TAB 4: REVIEWS & FAQ */}
-        {activeTab === "reviews" && (
-          <div className="space-y-10">
-            {/* Testimonials */}
-            <section className="space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div>
-                  <h2 className="font-serif-display text-3xl">Student Testimonials</h2>
-                  <p className="text-sm text-[#6E5A4F]">
-                    Real student and parent stories displayed on the homepage.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const nextTesti: TestimonialItem = {
-                      id: makeId("review"),
-                      name: "Student Name",
-                      role: "Student · Entebbe",
-                      quote: "Share what the student loved about lessons.",
-                      rating: 5,
-                      published: true,
-                    };
-                    updateContent((prev) => ({
-                      ...prev,
-                      testimonials: [...prev.testimonials, nextTesti],
-                    }));
-                  }}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#14110F] hover:bg-[#C87A53] text-white text-xs font-semibold uppercase tracking-[0.12em] cursor-pointer"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add Review</span>
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {content.testimonials.map((t) => (
-                  <div
-                    key={t.id}
-                    className="rounded-2xl bg-white border border-[#C87A53]/25 p-5 space-y-3"
-                  >
-                    <div className="flex items-center justify-between">
-                      <label className="inline-flex items-center gap-2 text-xs font-medium cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={t.published}
-                          onChange={(e) =>
-                            updateContent((prev) => ({
-                              ...prev,
-                              testimonials: prev.testimonials.map((item) =>
-                                item.id === t.id
-                                  ? { ...item, published: e.target.checked }
-                                  : item
-                              ),
-                            }))
-                          }
-                        />
-                        <span>Published</span>
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          updateContent((prev) => ({
-                            ...prev,
-                            testimonials: prev.testimonials.filter((item) => item.id !== t.id),
-                          }))
-                        }
-                        className="text-xs text-red-600 hover:text-red-800 inline-flex items-center gap-1 cursor-pointer"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Remove</span>
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <input
-                        type="text"
-                        value={t.name}
-                        placeholder="Name"
-                        onChange={(e) =>
-                          updateContent((prev) => ({
-                            ...prev,
-                            testimonials: prev.testimonials.map((item) =>
-                              item.id === t.id ? { ...item, name: e.target.value } : item
-                            ),
-                          }))
-                        }
-                        className="px-3 py-2 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25 text-sm"
-                      />
-                      <input
-                        type="text"
-                        value={t.role}
-                        placeholder="Role (e.g. Parent)"
-                        onChange={(e) =>
-                          updateContent((prev) => ({
-                            ...prev,
-                            testimonials: prev.testimonials.map((item) =>
-                              item.id === t.id ? { ...item, role: e.target.value } : item
-                            ),
-                          }))
-                        }
-                        className="px-3 py-2 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25 text-sm"
-                      />
-                    </div>
-                    <textarea
-                      rows={3}
-                      value={t.quote}
-                      onChange={(e) =>
-                        updateContent((prev) => ({
-                          ...prev,
-                          testimonials: prev.testimonials.map((item) =>
-                            item.id === t.id ? { ...item, quote: e.target.value } : item
-                          ),
-                        }))
-                      }
-                      className="w-full px-3 py-2 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25 text-sm"
-                    />
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* FAQs */}
-            <section className="space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div>
-                  <h2 className="font-serif-display text-3xl flex items-center gap-2">
-                    <HelpCircle className="w-6 h-6 text-[#A65C38]" />
-                    <span>Frequently Asked Questions</span>
-                  </h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const nextFaq: FaqItem = {
-                      id: makeId("faq"),
-                      question: "New question?",
-                      answer: "Write a clear, helpful answer.",
-                    };
-                    updateContent((prev) => ({
-                      ...prev,
-                      faqs: [...prev.faqs, nextFaq],
-                    }));
-                  }}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#14110F] hover:bg-[#C87A53] text-white text-xs font-semibold uppercase tracking-[0.12em] cursor-pointer"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add FAQ</span>
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                {content.faqs.map((faq) => (
-                  <div
-                    key={faq.id}
-                    className="rounded-2xl bg-white border border-[#C87A53]/25 p-5 space-y-3"
-                  >
-                    <div className="flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          updateContent((prev) => ({
-                            ...prev,
-                            faqs: prev.faqs.filter((item) => item.id !== faq.id),
-                          }))
-                        }
-                        className="text-xs text-red-600 hover:text-red-800 inline-flex items-center gap-1 cursor-pointer"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Remove</span>
-                      </button>
-                    </div>
-                    <input
-                      type="text"
-                      value={faq.question}
-                      onChange={(e) =>
-                        updateContent((prev) => ({
-                          ...prev,
-                          faqs: prev.faqs.map((item) =>
-                            item.id === faq.id ? { ...item, question: e.target.value } : item
-                          ),
-                        }))
-                      }
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25 font-medium"
-                    />
-                    <textarea
-                      rows={2}
-                      value={faq.answer}
-                      onChange={(e) =>
-                        updateContent((prev) => ({
-                          ...prev,
-                          faqs: prev.faqs.map((item) =>
-                            item.id === faq.id ? { ...item, answer: e.target.value } : item
-                          ),
-                        }))
-                      }
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25 text-sm"
-                    />
-                  </div>
-                ))}
-              </div>
-            </section>
-          </div>
-        )}
-
-        {/* TAB 5: STUDIO PROFILE & BACKUP */}
+        {/* TAB 3: STUDIO PROFILE, PIN & BACKUP */}
         {activeTab === "studio" && (
           <section className="space-y-6">
             <div>
-              <h2 className="font-serif-display text-3xl">Studio Profile & Contact</h2>
-              <p className="text-sm text-[#6E5A4F]">
-                Update contact numbers, social links, bio text, and download or restore JSON backups.
+              <h2 className="font-display font-bold text-3xl text-slate-900">
+                Studio & Contact
+              </h2>
+              <p className="text-sm text-slate-500">
+                Update contact numbers, social links, PIN security, and backups.
               </p>
             </div>
 
-            <div className="rounded-2xl bg-white border border-[#C87A53]/25 p-6 space-y-5">
+            <div className="rounded-2xl bg-white border border-slate-200 p-6 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                  <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                     Brand Name
                   </label>
                   <input
@@ -1234,11 +910,11 @@ export default function AdminDashboard({
                         profile: { ...prev.profile, brandName: e.target.value },
                       }))
                     }
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                  <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                     Teacher Name
                   </label>
                   <input
@@ -1250,11 +926,11 @@ export default function AdminDashboard({
                         profile: { ...prev.profile, teacherName: e.target.value },
                       }))
                     }
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                  <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                     Primary WhatsApp Digits (e.g. 256705576698)
                   </label>
                   <input
@@ -1266,11 +942,11 @@ export default function AdminDashboard({
                         profile: { ...prev.profile, whatsappPrimary: e.target.value },
                       }))
                     }
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                  <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                     Primary Phone Display
                   </label>
                   <input
@@ -1282,11 +958,11 @@ export default function AdminDashboard({
                         profile: { ...prev.profile, phoneDisplayPrimary: e.target.value },
                       }))
                     }
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                  <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                     Secondary Phone Digits
                   </label>
                   <input
@@ -1298,11 +974,11 @@ export default function AdminDashboard({
                         profile: { ...prev.profile, whatsappSecondary: e.target.value },
                       }))
                     }
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                  <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                     Secondary Phone Display
                   </label>
                   <input
@@ -1317,11 +993,11 @@ export default function AdminDashboard({
                         },
                       }))
                     }
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                  <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                     Email
                   </label>
                   <input
@@ -1333,11 +1009,11 @@ export default function AdminDashboard({
                         profile: { ...prev.profile, email: e.target.value },
                       }))
                     }
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                  <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                     Teaching Hours
                   </label>
                   <input
@@ -1349,11 +1025,11 @@ export default function AdminDashboard({
                         profile: { ...prev.profile, teachingHours: e.target.value },
                       }))
                     }
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                  <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                     YouTube Channel URL
                   </label>
                   <input
@@ -1365,11 +1041,11 @@ export default function AdminDashboard({
                         profile: { ...prev.profile, youtubeChannelUrl: e.target.value },
                       }))
                     }
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                  <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                     Instagram URL (optional)
                   </label>
                   <input
@@ -1382,60 +1058,26 @@ export default function AdminDashboard({
                       }))
                     }
                     placeholder="https://instagram.com/..."
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
-                  Hero Subtitle
-                </label>
-                <textarea
-                  rows={2}
-                  value={content.profile.heroSubtitle}
-                  onChange={(e) =>
-                    updateContent((prev) => ({
-                      ...prev,
-                      profile: { ...prev.profile, heroSubtitle: e.target.value },
-                    }))
-                  }
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
-                  About Quote
-                </label>
-                <input
-                  type="text"
-                  value={content.profile.aboutQuote}
-                  onChange={(e) =>
-                    updateContent((prev) => ({
-                      ...prev,
-                      profile: { ...prev.profile, aboutQuote: e.target.value },
-                    }))
-                  }
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25"
-                />
               </div>
             </div>
 
             {/* Security: Change 6-Digit PIN */}
             <form
               onSubmit={handleChangePin}
-              className="rounded-2xl bg-white border border-[#C87A53]/25 p-6 space-y-4"
+              className="rounded-2xl bg-white border border-slate-200 p-6 space-y-4"
             >
               <div className="flex items-start gap-3">
-                <span className="w-10 h-10 rounded-xl bg-[#14110F] text-[#E5A989] flex items-center justify-center shrink-0">
+                <span className="w-10 h-10 rounded-xl bg-slate-900 text-indigo-300 flex items-center justify-center shrink-0">
                   <KeyRound className="w-5 h-5" />
                 </span>
                 <div>
-                  <h3 className="font-serif-display text-2xl">
+                  <h3 className="font-display font-bold text-2xl text-slate-900">
                     Studio Security · Change 6-Digit PIN
                   </h3>
-                  <p className="text-sm text-[#6E5A4F]">
+                  <p className="text-sm text-slate-500">
                     Set your own private 6-digit PIN anytime. It is encrypted privately in the cloud and never stored in source code.
                   </p>
                 </div>
@@ -1455,7 +1097,7 @@ export default function AdminDashboard({
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                  <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                     Current 6-Digit PIN
                   </label>
                   <input
@@ -1467,11 +1109,11 @@ export default function AdminDashboard({
                       setCurrentPin(e.target.value.replace(/\D/g, "").slice(0, 6))
                     }
                     placeholder="••••••"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25 font-mono-meta tracking-[0.25em]"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono-meta tracking-[0.25em]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                  <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                     New 6-Digit PIN
                   </label>
                   <input
@@ -1483,11 +1125,11 @@ export default function AdminDashboard({
                       setNewPin(e.target.value.replace(/\D/g, "").slice(0, 6))
                     }
                     placeholder="••••••"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25 font-mono-meta tracking-[0.25em]"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono-meta tracking-[0.25em]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono-meta uppercase text-[#6E5A4F] mb-1">
+                  <label className="block text-[11px] font-mono-meta uppercase text-slate-500 mb-1">
                     Confirm New PIN
                   </label>
                   <input
@@ -1499,7 +1141,7 @@ export default function AdminDashboard({
                       setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, 6))
                     }
                     placeholder="••••••"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF6F0] border border-[#C87A53]/25 font-mono-meta tracking-[0.25em]"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono-meta tracking-[0.25em]"
                   />
                 </div>
               </div>
@@ -1507,7 +1149,7 @@ export default function AdminDashboard({
               <button
                 type="submit"
                 disabled={pinSaving}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#14110F] hover:bg-[#C87A53] disabled:opacity-60 text-white text-xs font-semibold uppercase tracking-[0.12em] cursor-pointer transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-900 hover:bg-[#4F46E5] disabled:opacity-60 text-white text-xs font-semibold uppercase tracking-[0.12em] cursor-pointer transition-colors"
               >
                 <KeyRound className="w-3.5 h-3.5" />
                 <span>{pinSaving ? "Updating PIN..." : "Update 6-Digit PIN"}</span>
@@ -1515,23 +1157,25 @@ export default function AdminDashboard({
             </form>
 
             {/* Backup & Restore */}
-            <div className="rounded-2xl bg-[#F2EAE0] border border-[#C87A53]/25 p-6 flex flex-wrap items-center justify-between gap-4">
+            <div className="rounded-2xl bg-slate-100 border border-slate-200 p-6 flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h3 className="font-serif-display text-2xl">Backup & Portability</h3>
-                <p className="text-sm text-[#6E5A4F]">
-                  Export or restore <code className="font-mono-meta">site-content.json</code> anytime — zero vendor lock-in.
+                <h3 className="font-display font-bold text-xl text-slate-900">
+                  Backup & Portability
+                </h3>
+                <p className="text-sm text-slate-500">
+                  Export or restore <code className="font-mono-meta">site-content.json</code> anytime.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
                   onClick={handleExportJson}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#14110F] text-white text-xs font-semibold uppercase tracking-[0.12em] cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-slate-900 text-white text-xs font-semibold uppercase tracking-[0.12em] cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Export JSON</span>
                 </button>
-                <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-[#C87A53] text-[#14110F] text-xs font-semibold uppercase tracking-[0.12em] cursor-pointer">
+                <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-slate-300 bg-white text-slate-800 text-xs font-semibold uppercase tracking-[0.12em] cursor-pointer">
                   <Upload className="w-3.5 h-3.5" />
                   <span>Import JSON</span>
                   <input
@@ -1546,6 +1190,380 @@ export default function AdminDashboard({
           </section>
         )}
       </main>
+
+      {/* POPUP MODAL: ADD CLASS */}
+      {classDraft && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Add New Class"
+          className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setClassDraft(null)}
+        >
+          <form
+            onSubmit={handleCreateClass}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white text-slate-900 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 shadow-2xl border border-slate-200 relative space-y-5"
+          >
+            <button
+              type="button"
+              aria-label="Close popup"
+              onClick={() => setClassDraft(null)}
+              className="absolute top-5 right-5 p-2 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div>
+              <span className="inline-block px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold mb-2">
+                New Class
+              </span>
+              <h3 className="font-display font-bold text-2xl sm:text-3xl text-slate-900">
+                Add a Piano Class
+              </h3>
+            </div>
+
+            {modalError && (
+              <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                {modalError}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Class Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  autoFocus
+                  value={classDraft.title}
+                  onChange={(e) =>
+                    setClassDraft({ ...classDraft, title: e.target.value })
+                  }
+                  placeholder="e.g. Saturday Kids Keyboard Club"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Age Group
+                </label>
+                <select
+                  value={classDraft.ageGroup}
+                  onChange={(e) =>
+                    setClassDraft({
+                      ...classDraft,
+                      ageGroup: e.target.value as AgeGroup,
+                    })
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
+                >
+                  <option value="Children">Children</option>
+                  <option value="Teens">Teens</option>
+                  <option value="Adults">Adults</option>
+                  <option value="All Ages">All Ages</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Level
+                </label>
+                <select
+                  value={classDraft.level}
+                  onChange={(e) =>
+                    setClassDraft({
+                      ...classDraft,
+                      level: e.target.value as SkillLevel,
+                    })
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
+                >
+                  <option value="Beginner">Beginner</option>
+                  <option value="Intermediate">Intermediate</option>
+                  <option value="Advanced">Advanced</option>
+                  <option value="All Levels">All Levels</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Duration
+                </label>
+                <input
+                  type="text"
+                  value={classDraft.duration}
+                  onChange={(e) =>
+                    setClassDraft({ ...classDraft, duration: e.target.value })
+                  }
+                  placeholder="45 min / 60 min"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Format
+                </label>
+                <input
+                  type="text"
+                  value={classDraft.format}
+                  onChange={(e) =>
+                    setClassDraft({ ...classDraft, format: e.target.value })
+                  }
+                  placeholder="In-Person · Entebbe"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Short Description
+                </label>
+                <textarea
+                  rows={2}
+                  value={classDraft.summary}
+                  onChange={(e) =>
+                    setClassDraft({ ...classDraft, summary: e.target.value })
+                  }
+                  placeholder="What will students learn and enjoy in this class?"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Key Highlights (one per line)
+                </label>
+                <textarea
+                  rows={3}
+                  value={classDraft.highlights.join("\n")}
+                  onChange={(e) =>
+                    setClassDraft({
+                      ...classDraft,
+                      highlights: e.target.value.split("\n"),
+                    })
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+              <label className="inline-flex items-center gap-2 text-xs font-medium cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={classDraft.published}
+                  onChange={(e) =>
+                    setClassDraft({ ...classDraft, published: e.target.checked })
+                  }
+                />
+                <span>Publish immediately on website</span>
+              </label>
+
+              <div className="flex gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setClassDraft(null)}
+                  className="px-4 py-2.5 rounded-full border border-slate-200 text-xs font-semibold text-slate-700 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-xs font-semibold uppercase tracking-[0.1em] cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>{saving ? "Saving..." : "Save & Publish Class"}</span>
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* POPUP MODAL: ADD VIDEO */}
+      {videoDraft && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Add New Video"
+          className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setVideoDraft(null)}
+        >
+          <form
+            onSubmit={handleCreateVideo}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white text-slate-900 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 shadow-2xl border border-slate-200 relative space-y-5"
+          >
+            <button
+              type="button"
+              aria-label="Close popup"
+              onClick={() => setVideoDraft(null)}
+              className="absolute top-5 right-5 p-2 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div>
+              <span className="inline-block px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold mb-2">
+                New Video
+              </span>
+              <h3 className="font-display font-bold text-2xl sm:text-3xl text-slate-900">
+                Add a YouTube Video
+              </h3>
+            </div>
+
+            {modalError && (
+              <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                {modalError}
+              </div>
+            )}
+
+            {/* Live thumbnail preview right inside the popup */}
+            <div className="aspect-video rounded-2xl overflow-hidden bg-slate-900 border border-slate-200 flex items-center justify-center">
+              {draftThumb ? (
+                <img
+                  src={draftThumb}
+                  alt={videoDraft.title || "Video preview"}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <p className="text-xs text-slate-400 px-4 text-center">
+                  Paste a YouTube link below to preview the thumbnail automatically
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  YouTube Link
+                </label>
+                <input
+                  type="url"
+                  autoFocus
+                  value={videoDraft.youtubeUrl}
+                  onChange={(e) =>
+                    setVideoDraft({ ...videoDraft, youtubeUrl: e.target.value })
+                  }
+                  placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
+                />
+                {videoDraft.youtubeUrl.trim() && (
+                  <p className="text-[11px] font-mono-meta text-slate-500 mt-1">
+                    {draftYtId
+                      ? `Detected YouTube ID: ${draftYtId}`
+                      : "Could not detect valid YouTube ID yet"}
+                  </p>
+                )}
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Video Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={videoDraft.title}
+                  onChange={(e) =>
+                    setVideoDraft({ ...videoDraft, title: e.target.value })
+                  }
+                  placeholder="e.g. Easy Worship Chords in C Major"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Category
+                </label>
+                <select
+                  value={videoDraft.category}
+                  onChange={(e) =>
+                    setVideoDraft({
+                      ...videoDraft,
+                      category: e.target.value as VideoCategory,
+                    })
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
+                >
+                  <option value="Tutorial">Tutorial</option>
+                  <option value="Practice Tip">Practice Tip</option>
+                  <option value="Performance">Performance</option>
+                  <option value="Student Showcase">Student Showcase</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Duration Label
+                </label>
+                <input
+                  type="text"
+                  value={videoDraft.duration}
+                  onChange={(e) =>
+                    setVideoDraft({ ...videoDraft, duration: e.target.value })
+                  }
+                  placeholder="5 min"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Short Description
+                </label>
+                <textarea
+                  rows={2}
+                  value={videoDraft.description}
+                  onChange={(e) =>
+                    setVideoDraft({ ...videoDraft, description: e.target.value })
+                  }
+                  placeholder="What will viewers learn in this clip?"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+              <label className="inline-flex items-center gap-2 text-xs font-medium cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={videoDraft.published}
+                  onChange={(e) =>
+                    setVideoDraft({ ...videoDraft, published: e.target.checked })
+                  }
+                />
+                <span>Publish immediately on website</span>
+              </label>
+
+              <div className="flex gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setVideoDraft(null)}
+                  className="px-4 py-2.5 rounded-full border border-slate-200 text-xs font-semibold text-slate-700 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-xs font-semibold uppercase tracking-[0.1em] cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>{saving ? "Saving..." : "Save & Publish Video"}</span>
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }
