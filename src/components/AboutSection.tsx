@@ -7,26 +7,26 @@ interface AboutSectionProps {
 
 const PILLAR_ICONS = [Heart, Music, Sparkles, Users];
 const PILLAR_STYLES = [
-  "bg-rose-500/15 text-rose-400 border-rose-500/20",
-  "bg-indigo-500/15 text-indigo-400 border-indigo-500/20",
-  "bg-amber-500/15 text-amber-400 border-amber-500/20",
-  "bg-emerald-500/15 text-emerald-400 border-emerald-500/20",
+  "bg-rose-50 text-rose-600 border-rose-200/80",
+  "bg-indigo-50 text-indigo-600 border-indigo-200/80",
+  "bg-amber-50 text-amber-600 border-amber-200/80",
+  "bg-emerald-50 text-emerald-600 border-emerald-200/80",
 ];
 
 export default function AboutSection({ profile }: AboutSectionProps) {
   return (
-    <section id="about" className="py-16 sm:py-24 bg-[#111116] border-t border-white/5">
+    <section id="about" className="py-16 sm:py-24 bg-[#F5F7FB] text-slate-900">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           {/* Left: Welcome + Pillars */}
           <div className="lg:col-span-7 space-y-5">
-            <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-indigo-300 text-xs font-semibold">
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-semibold">
               Meet Your Teacher
             </span>
-            <h2 className="font-display font-bold text-3xl sm:text-5xl text-white leading-tight">
+            <h2 className="font-display font-bold text-3xl sm:text-5xl text-slate-900 leading-tight">
               {profile.aboutHeadline}
             </h2>
-            <p className="text-base sm:text-lg text-zinc-400 leading-relaxed max-w-2xl">
+            <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl">
               {profile.aboutParagraph1}
             </p>
 
@@ -37,7 +37,7 @@ export default function AboutSection({ profile }: AboutSectionProps) {
                 return (
                   <div
                     key={pillar.title}
-                    className="rounded-2xl bg-[#18181F] border border-white/10 p-4 flex items-start gap-3.5 hover:border-indigo-500/40 transition-colors"
+                    className="rounded-2xl bg-white border border-slate-200/80 p-4 flex items-start gap-3.5 shadow-xs hover:border-indigo-300 transition-colors"
                   >
                     <span
                       className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${style}`}
@@ -45,10 +45,10 @@ export default function AboutSection({ profile }: AboutSectionProps) {
                       <Icon className="w-5 h-5" />
                     </span>
                     <div>
-                      <h3 className="font-display font-bold text-base text-white">
+                      <h3 className="font-display font-bold text-base text-slate-900">
                         {pillar.title}
                       </h3>
-                      <p className="text-sm text-zinc-400 mt-0.5 leading-snug">
+                      <p className="text-sm text-slate-600 mt-0.5 leading-snug">
                         {pillar.description}
                       </p>
                     </div>
@@ -60,7 +60,7 @@ export default function AboutSection({ profile }: AboutSectionProps) {
 
           {/* Right: Photo + Quote */}
           <div className="lg:col-span-5 space-y-4">
-            <div className="rounded-3xl overflow-hidden border border-white/10 bg-zinc-900 aspect-[4/3] shadow-2xl">
+            <div className="rounded-3xl overflow-hidden border border-slate-200 bg-white aspect-[4/3] shadow-lg">
               <img
                 src={
                   profile.aboutImageUrl ||
@@ -71,7 +71,7 @@ export default function AboutSection({ profile }: AboutSectionProps) {
               />
             </div>
 
-            <div className="rounded-2xl bg-gradient-to-br from-indigo-500/20 via-[#18181F] to-[#18181F] border border-indigo-500/30 text-white p-5 sm:p-6">
+            <div className="rounded-2xl bg-[#11131C] border border-slate-800 text-white p-5 sm:p-6 shadow-md">
               <p className="font-display font-semibold text-lg sm:text-xl leading-snug text-zinc-100">
                 “{profile.aboutQuote}”
               </p>

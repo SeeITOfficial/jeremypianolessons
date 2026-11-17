@@ -29,11 +29,15 @@ export default function Hero({
       {/* Subtle studio lighting */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-24 -left-24 w-[28rem] h-[28rem] rounded-full bg-indigo-600/20 blur-[120px]"
+        className="pointer-events-none absolute -top-28 -left-20 w-[34rem] h-[34rem] rounded-full bg-indigo-500/25 blur-[130px]"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none bottom-0 -right-24 absolute w-[26rem] h-[26rem] rounded-full bg-amber-500/10 blur-[120px]"
+        className="pointer-events-none top-1/4 right-0 absolute w-[30rem] h-[30rem] rounded-full bg-sky-400/12 blur-[130px]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none bottom-0 right-1/4 absolute w-[26rem] h-[26rem] rounded-full bg-amber-400/12 blur-[120px]"
       />
 
       <div className="max-w-7xl mx-auto px-5 sm:px-8 relative z-10">

@@ -18,10 +18,10 @@ export default function TestimonialsSection({
   if (published.length === 0) return null;
 
   return (
-    <section className="py-16 sm:py-24 bg-[#09090B]">
+    <section className="py-16 sm:py-24 bg-[#141622]">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <div className="text-center max-w-2xl mx-auto mb-10">
-          <span className="inline-block px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-rose-300 text-xs font-semibold mb-3">
+          <span className="inline-block px-3 py-1 rounded-full bg-white/[0.08] border border-white/15 text-rose-300 text-xs font-semibold mb-3">
             Student Stories
           </span>
           <h2 className="font-display font-bold text-3xl sm:text-5xl text-white">
@@ -33,7 +33,7 @@ export default function TestimonialsSection({
           {published.map((item, idx) => (
             <div
               key={item.id}
-              className="rounded-3xl bg-[#111116] border border-white/10 p-6 flex flex-col justify-between"
+              className="rounded-3xl bg-[#1B1E2B] border border-white/12 p-6 flex flex-col justify-between"
             >
               <div>
                 <div className="flex gap-1 text-amber-400 mb-3">

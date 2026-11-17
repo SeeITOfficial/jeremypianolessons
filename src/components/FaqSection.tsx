@@ -14,10 +14,10 @@ export default function FaqSection({ faqs }: FaqSectionProps) {
   if (faqs.length === 0) return null;
 
   return (
-    <section id="faq" className="py-16 sm:py-20 bg-[#111116] border-t border-white/5">
+    <section id="faq" className="py-16 sm:py-20 bg-[#0B0C12] border-t border-white/10">
       <div className="max-w-3xl mx-auto px-5 sm:px-8">
         <div className="text-center mb-8">
-          <span className="inline-block px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-indigo-300 text-xs font-semibold mb-3">
+          <span className="inline-block px-3 py-1 rounded-full bg-white/[0.08] border border-white/15 text-indigo-300 text-xs font-semibold mb-3">
             Quick Answers
           </span>
           <h2 className="font-display font-bold text-3xl sm:text-4xl text-white">
@@ -31,7 +31,7 @@ export default function FaqSection({ faqs }: FaqSectionProps) {
             return (
               <div
                 key={faq.id}
-                className="rounded-2xl bg-[#18181F] border border-white/10 overflow-hidden"
+                className="rounded-2xl bg-[#141622] border border-white/12 overflow-hidden"
               >
                 <button
                   type="button"

@@ -76,11 +76,11 @@ export default function ClassesSection({
   }, [publishedClasses, activeFilter]);
 
   return (
-    <section id="classes" className="py-16 sm:py-24 bg-[#09090B] border-t border-white/5">
+    <section id="classes" className="py-16 sm:py-24 bg-[#141622] border-t border-white/10">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
           <div>
-            <span className="inline-block px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-indigo-300 text-xs font-semibold mb-3">
+            <span className="inline-block px-3 py-1 rounded-full bg-white/[0.08] border border-white/15 text-indigo-300 text-xs font-semibold mb-3">
               Classes for Everyone
             </span>
             <h2 className="font-display font-bold text-3xl sm:text-5xl text-white">
@@ -105,7 +105,7 @@ export default function ClassesSection({
                   className={`px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     active
                       ? "bg-indigo-500 text-white shadow-md shadow-indigo-500/25"
-                      : "bg-[#18181F] text-zinc-400 border border-white/10 hover:text-white hover:border-white/25"
+                      : "bg-[#1D2030] text-zinc-300 border border-white/10 hover:text-white hover:border-white/25"
                   }`}
                 >
                   {filter}
@@ -116,7 +116,7 @@ export default function ClassesSection({
         </div>
 
         {filteredClasses.length === 0 ? (
-          <div className="bg-[#18181F] rounded-2xl border border-white/10 p-8 text-center text-zinc-400">
+          <div className="bg-[#1D2030] rounded-2xl border border-white/10 p-8 text-center text-zinc-300">
             No classes under this filter yet.{" "}
             <button
               type="button"
@@ -134,7 +134,7 @@ export default function ClassesSection({
               return (
                 <article
                   key={cls.id}
-                  className={`rounded-3xl bg-[#111116] p-6 sm:p-7 border border-white/10 ${theme.accentBorder} shadow-lg transition-all flex flex-col justify-between`}
+                  className={`rounded-3xl bg-[#1B1E2B] p-6 sm:p-7 border border-white/12 ${theme.accentBorder} shadow-lg transition-all flex flex-col justify-between`}
                 >
                   <div>
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
