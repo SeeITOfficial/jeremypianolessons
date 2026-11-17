@@ -5,7 +5,6 @@ import Link from "next/link";
 import { upload } from "@vercel/blob/client";
 import {
   CheckCircle2,
-  Download,
   ExternalLink,
   Film,
   GraduationCap,
@@ -326,47 +325,6 @@ export default function AdminDashboard({
     setContent(nextContent);
     setVideoDraft(null);
     await persistContent(nextContent, `Added "${cleaned.title}" and published live.`);
-  };
-
-  const handleExportJson = () => {
-    const blob = new Blob([JSON.stringify(content, null, 2) + "\n"], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "site-content.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleImportJson = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const text = await file.text();
-      const parsed = JSON.parse(text) as SiteContent;
-      if (!parsed.profile || !Array.isArray(parsed.classes)) {
-        setStatusBanner({
-          type: "error",
-          text: "Invalid site-content.json file.",
-        });
-        return;
-      }
-      setContent(parsed);
-      setDirty(true);
-      setStatusBanner({
-        type: "warning",
-        text: "JSON imported into editor. Click Save & Publish to apply.",
-      });
-    } catch {
-      setStatusBanner({
-        type: "error",
-        text: "Could not parse JSON file.",
-      });
-    } finally {
-      e.target.value = "";
-    }
   };
 
   const handleChangePin = async (e: React.FormEvent) => {
@@ -1096,7 +1054,7 @@ export default function AdminDashboard({
           </section>
         )}
 
-        {/* TAB 3: STUDIO PROFILE, PIN & BACKUP */}
+        {/* TAB 3: STUDIO PROFILE & PIN */}
         {activeTab === "studio" && (
           <section className="space-y-6">
             <div>
@@ -1104,7 +1062,7 @@ export default function AdminDashboard({
                 Studio & Contact
               </h2>
               <p className="text-sm text-slate-500">
-                Update contact numbers, social links, PIN security, and backups.
+                Update contact numbers, social links, and PIN security.
               </p>
             </div>
 
@@ -1368,38 +1326,6 @@ export default function AdminDashboard({
                 <span>{pinSaving ? "Updating PIN..." : "Update 6-Digit PIN"}</span>
               </button>
             </form>
-
-            {/* Backup & Restore */}
-            <div className="rounded-2xl bg-slate-100 border border-slate-200 p-6 flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <h3 className="font-display font-bold text-xl text-slate-900">
-                  Backup & Portability
-                </h3>
-                <p className="text-sm text-slate-500">
-                  Export or restore <code className="font-mono-meta">site-content.json</code> anytime.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={handleExportJson}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-slate-900 text-white text-xs font-semibold uppercase tracking-[0.12em] cursor-pointer"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Export JSON</span>
-                </button>
-                <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-slate-300 bg-white text-slate-800 text-xs font-semibold uppercase tracking-[0.12em] cursor-pointer">
-                  <Upload className="w-3.5 h-3.5" />
-                  <span>Import JSON</span>
-                  <input
-                    type="file"
-                    accept="application/json"
-                    onChange={handleImportJson}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-            </div>
           </section>
         )}
       </main>
