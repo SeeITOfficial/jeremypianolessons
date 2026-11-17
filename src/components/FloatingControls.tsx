@@ -39,13 +39,13 @@ export default function FloatingControls({
           type="button"
           onClick={onToggleMusic}
           aria-label={isMusicPlaying ? "Pause studio music" : "Play studio music"}
-          title={isMusicPlaying ? "Pause Studio Jazz" : "Play Studio Jazz"}
-          className="w-11 h-11 rounded-full bg-[#14110F]/90 hover:bg-[#14110F] text-[#FAF6F0] border border-white/15 shadow-lg backdrop-blur-md flex items-center justify-center cursor-pointer transition-all"
+          title={isMusicPlaying ? "Pause Studio Music" : "Play Studio Music"}
+          className="w-11 h-11 rounded-full bg-slate-900/90 hover:bg-[#4F46E5] text-white border border-white/15 shadow-lg backdrop-blur-md flex items-center justify-center cursor-pointer transition-all"
         >
           {isMusicPlaying ? (
-            <Pause className="w-4 h-4 text-[#C87A53]" />
+            <Pause className="w-4 h-4 text-amber-400" />
           ) : (
-            <Play className="w-4 h-4 text-[#C87A53] ml-0.5" />
+            <Play className="w-4 h-4 text-amber-400 ml-0.5" />
           )}
         </button>
       )}

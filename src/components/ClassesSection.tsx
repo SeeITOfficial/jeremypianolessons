@@ -24,6 +24,39 @@ const AGE_FILTERS: Array<"All" | AgeGroup> = [
   "All Ages",
 ];
 
+function getTrackTheme(ageGroup: AgeGroup) {
+  switch (ageGroup) {
+    case "Children":
+      return {
+        badge: "bg-rose-100 text-rose-700",
+        accentBorder: "hover:border-rose-300",
+        icon: "🧒",
+        button: "bg-rose-600 hover:bg-rose-700 text-white",
+      };
+    case "Teens":
+      return {
+        badge: "bg-indigo-100 text-indigo-700",
+        accentBorder: "hover:border-indigo-300",
+        icon: "🎧",
+        button: "bg-[#4F46E5] hover:bg-[#4338CA] text-white",
+      };
+    case "Adults":
+      return {
+        badge: "bg-emerald-100 text-emerald-700",
+        accentBorder: "hover:border-emerald-300",
+        icon: "🎹",
+        button: "bg-emerald-600 hover:bg-emerald-700 text-white",
+      };
+    default:
+      return {
+        badge: "bg-amber-100 text-amber-800",
+        accentBorder: "hover:border-amber-300",
+        icon: "✨",
+        button: "bg-amber-500 hover:bg-amber-600 text-slate-950",
+      };
+  }
+}
+
 export default function ClassesSection({
   classes,
   onSelectClassForBooking,
@@ -43,22 +76,16 @@ export default function ClassesSection({
   }, [publishedClasses, activeFilter]);
 
   return (
-    <section id="classes" className="py-20 sm:py-28 bg-[#F2EAE0]">
+    <section id="classes" className="py-16 sm:py-24 bg-[#F8FAFC]">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
-        {/* Section Header + Interactive Track Filter */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12">
-          <div className="max-w-2xl">
-            <span className="inline-block text-xs font-mono-meta uppercase tracking-[0.2em] text-[#A65C38] mb-3">
-              Classes & Programs
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
+          <div>
+            <span className="inline-block px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold mb-3">
+              Classes for Everyone
             </span>
-            <h2 className="font-serif-display text-4xl sm:text-5xl text-[#14110F] leading-[1.08]">
-              Find the right class for{" "}
-              <em className="italic text-[#A65C38]">your stage</em>
+            <h2 className="font-display font-bold text-3xl sm:text-5xl text-slate-900">
+              Pick your starting track
             </h2>
-            <p className="text-base text-[#6E5A4F] mt-3">
-              Filter by age group or click any track to inspect the full
-              syllabus and book directly.
-            </p>
           </div>
 
           <div
@@ -75,10 +102,10 @@ export default function ClassesSection({
                   role="tab"
                   aria-selected={active}
                   onClick={() => setActiveFilter(filter)}
-                  className={`px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-[0.1em] transition-all cursor-pointer ${
+                  className={`px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     active
-                      ? "bg-[#14110F] text-[#FAF6F0] shadow-sm"
-                      : "bg-[#FAF6F0] text-[#57473E] border border-[#C87A53]/25 hover:border-[#C87A53]"
+                      ? "bg-[#4F46E5] text-white shadow-sm"
+                      : "bg-white text-slate-600 border border-slate-200 hover:border-indigo-300"
                   }`}
                 >
                   {filter}
@@ -88,176 +115,144 @@ export default function ClassesSection({
           </div>
         </div>
 
-        {/* Classes Grid */}
         {filteredClasses.length === 0 ? (
-          <div className="bg-[#FAF6F0] rounded-2xl border border-[#C87A53]/20 p-10 text-center text-[#6E5A4F]">
-            No published classes match this filter yet. Try selecting{" "}
+          <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center text-slate-600">
+            No classes under this filter yet.{" "}
             <button
               type="button"
               onClick={() => setActiveFilter("All")}
-              className="underline text-[#A65C38] font-medium cursor-pointer"
+              className="underline text-[#4F46E5] font-semibold cursor-pointer"
             >
-              All
+              Show all classes
             </button>
-            .
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredClasses.map((cls) => (
-              <article
-                key={cls.id}
-                className={`group relative rounded-2xl sm:rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 border ${
-                  cls.featured
-                    ? "bg-[#14110F] text-[#FAF6F0] border-[#C87A53]/50 shadow-xl"
-                    : "bg-[#FAF6F0] text-[#14110F] border-[#C87A53]/20 hover:border-[#C87A53]/60 hover:shadow-lg"
-                }`}
-              >
-                <div>
-                  <div className="flex flex-wrap items-center justify-between gap-2 mb-5">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span
-                        className={`px-3 py-1 rounded-full text-[11px] font-mono-meta uppercase tracking-[0.12em] ${
-                          cls.featured
-                            ? "bg-[#C87A53]/20 text-[#E5A989]"
-                            : "bg-[#F2EAE0] text-[#A65C38]"
-                        }`}
-                      >
-                        {cls.ageGroup}
-                      </span>
-                      <span
-                        className={`px-3 py-1 rounded-full text-[11px] font-mono-meta uppercase tracking-[0.12em] ${
-                          cls.featured
-                            ? "bg-white/10 text-white/80"
-                            : "bg-[#14110F]/5 text-[#57473E]"
-                        }`}
-                      >
-                        {cls.level}
-                      </span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {filteredClasses.map((cls) => {
+              const theme = getTrackTheme(cls.ageGroup);
+              return (
+                <article
+                  key={cls.id}
+                  className={`rounded-3xl bg-white p-6 sm:p-7 border border-slate-200 ${theme.accentBorder} shadow-xs hover:shadow-lg transition-all flex flex-col justify-between`}
+                >
+                  <div>
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${theme.badge}`}
+                        >
+                          <span>{theme.icon}</span>
+                          <span>{cls.ageGroup}</span>
+                        </span>
+                        <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-medium">
+                          {cls.level}
+                        </span>
+                      </div>
+                      {cls.featured && (
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600">
+                          <Sparkles className="w-3.5 h-3.5" />
+                          Popular
+                        </span>
+                      )}
                     </div>
-                    {cls.featured && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-mono-meta uppercase tracking-[0.12em] text-[#E5A989]">
-                        <Sparkles className="w-3.5 h-3.5" />
-                        Popular Track
+
+                    <h3 className="font-display font-bold text-2xl text-slate-900 mb-2">
+                      {cls.title}
+                    </h3>
+
+                    <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                      {cls.summary}
+                    </p>
+
+                    <div className="flex flex-wrap gap-3 text-xs text-slate-500 pb-4 mb-4 border-b border-slate-100">
+                      <span className="inline-flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5 text-indigo-500" />
+                        {cls.duration}
                       </span>
-                    )}
+                      <span className="inline-flex items-center gap-1">
+                        <MapPin className="w-3.5 h-3.5 text-indigo-500" />
+                        {cls.format}
+                      </span>
+                      {cls.priceNote && <span>· {cls.priceNote}</span>}
+                    </div>
+
+                    <ul className="space-y-2 mb-6">
+                      {cls.highlights.slice(0, 3).map((point, idx) => (
+                        <li
+                          key={idx}
+                          className="flex items-start gap-2 text-sm text-slate-700"
+                        >
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                          <span>{point}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
 
-                  <h3 className="font-serif-display text-2xl sm:text-3xl leading-tight mb-3">
-                    {cls.title}
-                  </h3>
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => onSelectClassForBooking(cls)}
+                      className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${theme.button}`}
+                    >
+                      <span>Book This Class</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
 
-                  <p
-                    className={`text-sm sm:text-base leading-relaxed mb-6 ${
-                      cls.featured ? "text-[#FAF6F0]/75" : "text-[#6E5A4F]"
-                    }`}
-                  >
-                    {cls.summary}
-                  </p>
-
-                  <div
-                    className={`flex flex-wrap gap-4 text-xs font-mono-meta pb-5 mb-5 border-b ${
-                      cls.featured
-                        ? "text-[#FAF6F0]/70 border-white/10"
-                        : "text-[#6E5A4F] border-[#C87A53]/15"
-                    }`}
-                  >
-                    <span className="inline-flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-[#C87A53]" />
-                      {cls.duration}
-                    </span>
-                    <span className="inline-flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-[#C87A53]" />
-                      {cls.format}
-                    </span>
-                    {cls.priceNote && <span>· {cls.priceNote}</span>}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedModalClass(cls)}
+                      className="inline-flex items-center justify-center px-4 py-2.5 rounded-full text-xs font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                    >
+                      Syllabus
+                    </button>
                   </div>
-
-                  <ul className="space-y-2.5 mb-8">
-                    {cls.highlights.map((point, idx) => (
-                      <li
-                        key={idx}
-                        className={`flex items-start gap-2.5 text-sm ${
-                          cls.featured ? "text-[#FAF6F0]/85" : "text-[#43352D]"
-                        }`}
-                      >
-                        <CheckCircle2 className="w-4 h-4 text-[#C87A53] shrink-0 mt-0.5" />
-                        <span>{point}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => onSelectClassForBooking(cls)}
-                    className={`inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full text-xs font-semibold uppercase tracking-[0.12em] transition-colors cursor-pointer ${
-                      cls.featured
-                        ? "bg-[#C87A53] hover:bg-[#B56542] text-white"
-                        : "bg-[#14110F] hover:bg-[#2A221D] text-[#FAF6F0]"
-                    }`}
-                  >
-                    <span>Book This Class</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setSelectedModalClass(cls)}
-                    className={`inline-flex items-center justify-center px-4 py-3 rounded-full text-xs font-semibold uppercase tracking-[0.12em] border transition-colors cursor-pointer ${
-                      cls.featured
-                        ? "border-white/20 text-[#FAF6F0] hover:border-[#C87A53]"
-                        : "border-[#C87A53]/35 text-[#14110F] hover:bg-[#F2EAE0]"
-                    }`}
-                  >
-                    Syllabus Details
-                  </button>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* Syllabus Detail Modal */}
+      {/* Syllabus Modal */}
       {selectedModalClass && (
         <div
           role="dialog"
           aria-modal="true"
           aria-label={selectedModalClass.title}
-          className="fixed inset-0 z-50 bg-[#14110F]/80 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={() => setSelectedModalClass(null)}
         >
           <div
-            className="bg-[#FAF6F0] text-[#14110F] rounded-2xl sm:rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 shadow-2xl border border-[#C87A53]/25 relative"
+            className="bg-white text-slate-900 rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 shadow-2xl border border-slate-200 relative"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               type="button"
               aria-label="Close modal"
               onClick={() => setSelectedModalClass(null)}
-              className="absolute top-5 right-5 p-2 rounded-full bg-[#F2EAE0] text-[#14110F] hover:bg-[#C87A53] hover:text-white transition-colors cursor-pointer"
+              className="absolute top-5 right-5 p-2 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
 
             <div className="flex flex-wrap gap-2 mb-3">
-              <span className="px-3 py-1 rounded-full bg-[#F2EAE0] text-[#A65C38] text-[11px] font-mono-meta uppercase tracking-[0.12em]">
+              <span className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold">
                 {selectedModalClass.ageGroup}
               </span>
-              <span className="px-3 py-1 rounded-full bg-[#14110F]/5 text-[#57473E] text-[11px] font-mono-meta uppercase tracking-[0.12em]">
+              <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-medium">
                 {selectedModalClass.level}
               </span>
             </div>
 
-            <h3 className="font-serif-display text-3xl text-[#14110F] pr-8 mb-3">
+            <h3 className="font-display font-bold text-2xl sm:text-3xl text-slate-900 pr-8 mb-2">
               {selectedModalClass.title}
             </h3>
-            <p className="text-sm sm:text-base text-[#57473E] leading-relaxed mb-5">
+            <p className="text-sm text-slate-600 leading-relaxed mb-5">
               {selectedModalClass.summary}
             </p>
 
-            <div className="flex flex-wrap gap-4 text-xs font-mono-meta text-[#6E5A4F] bg-[#F2EAE0] rounded-xl px-4 py-3 mb-6">
+            <div className="flex flex-wrap gap-3 text-xs text-slate-600 bg-slate-50 rounded-xl px-4 py-3 mb-5">
               <span>{selectedModalClass.duration}</span>
               <span>·</span>
               <span>{selectedModalClass.format}</span>
@@ -269,13 +264,10 @@ export default function ClassesSection({
               )}
             </div>
 
-            <h4 className="text-xs font-mono-meta uppercase tracking-[0.16em] text-[#A65C38] mb-3">
-              What You Will Cover
-            </h4>
-            <ul className="space-y-3 mb-7">
+            <ul className="space-y-2.5 mb-7">
               {selectedModalClass.highlights.map((item, i) => (
-                <li key={i} className="flex items-start gap-2.5 text-sm text-[#1B1613]">
-                  <CheckCircle2 className="w-4 h-4 text-[#C87A53] shrink-0 mt-0.5" />
+                <li key={i} className="flex items-start gap-2.5 text-sm text-slate-800">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                   <span>{item}</span>
                 </li>
               ))}
@@ -288,9 +280,9 @@ export default function ClassesSection({
                 setSelectedModalClass(null);
                 onSelectClassForBooking(target);
               }}
-              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#14110F] hover:bg-[#C87A53] text-white text-xs font-semibold uppercase tracking-[0.14em] transition-colors cursor-pointer"
+              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold transition-colors cursor-pointer"
             >
-              <span>Request Trial for This Class</span>
+              <span>Book Trial for This Class</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

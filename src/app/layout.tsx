@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { Instrument_Serif, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
+import { JetBrains_Mono, Outfit, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-const instrumentSerif = Instrument_Serif({
+const outfit = Outfit({
   subsets: ["latin"],
-  weight: ["400"],
-  style: ["normal", "italic"],
-  variable: "--font-serif",
+  weight: ["500", "600", "700", "800"],
+  variable: "--font-display",
   display: "swap",
 });
 
@@ -25,16 +24,16 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Jeremy Piano Studio · Private Piano Lessons in Entebbe",
+  title: "Jeremy Piano Studio · Fun, Modern Piano Lessons in Entebbe",
   description:
-    "Patient, personalised 1-on-1 piano lessons in Entebbe, Uganda for children, teens, and adults. Classical, contemporary, gospel, and ear training.",
+    "Friendly 1-on-1 piano classes in Entebbe for kids, teens, and adult beginners. Learn pop, gospel, classical, and playing by ear.",
   icons: {
     icon: "/icon.svg",
   },
   openGraph: {
-    title: "Jeremy Piano Studio · Private Piano Lessons in Entebbe",
+    title: "Jeremy Piano Studio · Piano Lessons for All Ages in Entebbe",
     description:
-      "Inspire. Learn. Play. Personalised 1-on-1 piano coaching for children, teens, and adults in Entebbe, Uganda.",
+      "Learn Piano. Love Music. Patient, joyful 1-on-1 piano classes for kids, teens, and adult beginners in Entebbe.",
     type: "website",
     locale: "en_UG",
     images: [
@@ -48,9 +47,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Jeremy Piano Studio · Private Piano Lessons in Entebbe",
+    title: "Jeremy Piano Studio · Piano Lessons for All Ages in Entebbe",
     description:
-      "Personalised 1-on-1 piano lessons for children, teens, and adults in Entebbe, Uganda.",
+      "Fun, step-by-step 1-on-1 piano lessons for kids, teens, and adult beginners in Entebbe.",
   },
 };
 
@@ -62,9 +61,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${instrumentSerif.variable} ${plusJakarta.variable} ${jetbrainsMono.variable}`}
+      className={`${outfit.variable} ${plusJakarta.variable} ${jetbrainsMono.variable}`}
     >
-      <body className="min-h-screen antialiased selection:bg-[#C87A53]/25 selection:text-[#14110F]">
+      <body className="min-h-screen antialiased selection:bg-[#4F46E5]/20 selection:text-[#0F172A]">
         {children}
       </body>
     </html>

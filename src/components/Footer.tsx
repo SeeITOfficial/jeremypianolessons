@@ -11,26 +11,25 @@ export default function Footer({ profile }: FooterProps) {
   const waDigits = profile.whatsappPrimary.replace(/[^\d]/g, "");
 
   return (
-    <footer className="bg-[#14110F] text-[#FAF6F0] pt-16 pb-10 border-t border-white/10">
+    <footer className="bg-[#0F172A] text-white pt-14 pb-9 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-white/10">
-          <div className="md:col-span-5 space-y-4">
-            <div className="font-serif-display text-3xl">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-10 border-b border-slate-800">
+          <div className="md:col-span-5 space-y-3">
+            <div className="font-display font-bold text-2xl">
               {profile.brandName}
             </div>
-            <p className="text-sm text-[#FAF6F0]/65 max-w-sm leading-relaxed">
-              Private 1-on-1 piano coaching in {profile.location}. Building
-              technique, musical confidence, and lifelong joy at the keyboard.
+            <p className="text-sm text-slate-400 max-w-sm leading-relaxed">
+              Welcoming 1-on-1 piano lessons for children, teens, and adults in{" "}
+              {profile.location}.
             </p>
 
-            <div className="flex flex-wrap gap-2.5 pt-2">
+            <div className="flex flex-wrap gap-2 pt-2">
               {waDigits && (
                 <a
                   href={`https://wa.me/${waDigits}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="WhatsApp"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-white/15 hover:border-[#25D366] text-xs text-[#FAF6F0]/80 hover:text-[#25D366] transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-slate-800 hover:bg-emerald-600 text-xs font-medium text-slate-200 hover:text-white transition-colors"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
                   <span>WhatsApp</span>
@@ -41,8 +40,7 @@ export default function Footer({ profile }: FooterProps) {
                   href={profile.youtubeChannelUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="YouTube"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-white/15 hover:border-[#C87A53] text-xs text-[#FAF6F0]/80 hover:text-[#E5A989] transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-slate-800 hover:bg-[#4F46E5] text-xs font-medium text-slate-200 hover:text-white transition-colors"
                 >
                   <Youtube className="w-3.5 h-3.5" />
                   <span>YouTube</span>
@@ -53,7 +51,7 @@ export default function Footer({ profile }: FooterProps) {
                   href={profile.instagramUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center px-3.5 py-2 rounded-full border border-white/15 hover:border-[#C87A53] text-xs text-[#FAF6F0]/80 hover:text-[#E5A989] transition-colors"
+                  className="inline-flex items-center px-3.5 py-2 rounded-full bg-slate-800 hover:bg-[#4F46E5] text-xs font-medium text-slate-200 hover:text-white transition-colors"
                 >
                   Instagram
                 </a>
@@ -63,7 +61,7 @@ export default function Footer({ profile }: FooterProps) {
                   href={profile.facebookUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center px-3.5 py-2 rounded-full border border-white/15 hover:border-[#C87A53] text-xs text-[#FAF6F0]/80 hover:text-[#E5A989] transition-colors"
+                  className="inline-flex items-center px-3.5 py-2 rounded-full bg-slate-800 hover:bg-[#4F46E5] text-xs font-medium text-slate-200 hover:text-white transition-colors"
                 >
                   Facebook
                 </a>
@@ -71,79 +69,73 @@ export default function Footer({ profile }: FooterProps) {
             </div>
           </div>
 
-          <div className="md:col-span-3 space-y-3">
-            <h4 className="text-xs font-mono-meta uppercase tracking-[0.16em] text-[#E5A989]">
+          <div className="md:col-span-3 space-y-2.5">
+            <h4 className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-300">
               Explore
             </h4>
-            <ul className="space-y-2 text-sm text-[#FAF6F0]/70">
+            <ul className="space-y-2 text-sm text-slate-400">
               <li>
-                <a href="#classes" className="hover:text-[#E5A989]">
-                  Classes & Tracks
+                <a href="#classes" className="hover:text-white">
+                  Classes
                 </a>
               </li>
               <li>
-                <a href="#curriculum" className="hover:text-[#E5A989]">
-                  Curriculum & Sound Check
+                <a href="#curriculum" className="hover:text-white">
+                  Live Sound Lab
                 </a>
               </li>
               <li>
-                <a href="#about" className="hover:text-[#E5A989]">
+                <a href="#about" className="hover:text-white">
                   About {profile.teacherName}
                 </a>
               </li>
               <li>
-                <a href="#videos" className="hover:text-[#E5A989]">
-                  Video Lessons
+                <a href="#videos" className="hover:text-white">
+                  Videos
                 </a>
               </li>
               <li>
-                <a href="#guides" className="hover:text-[#E5A989]">
-                  Practice Guides
-                </a>
-              </li>
-              <li>
-                <a href="#booking" className="hover:text-[#E5A989]">
-                  Book a Trial Lesson
+                <a href="#booking" className="hover:text-white">
+                  Book Trial
                 </a>
               </li>
             </ul>
           </div>
 
-          <div className="md:col-span-4 space-y-3">
-            <h4 className="text-xs font-mono-meta uppercase tracking-[0.16em] text-[#E5A989]">
-              Studio Contact
+          <div className="md:col-span-4 space-y-2.5">
+            <h4 className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-300">
+              Contact
             </h4>
-            <ul className="space-y-2.5 text-sm text-[#FAF6F0]/70">
-              <li className="flex items-center gap-2.5">
-                <MapPin className="w-4 h-4 text-[#C87A53] shrink-0" />
+            <ul className="space-y-2 text-sm text-slate-400">
+              <li className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-amber-400 shrink-0" />
                 <span>{profile.location}</span>
               </li>
-              <li className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-[#C87A53] shrink-0" />
+              <li className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-amber-400 shrink-0" />
                 <span>{profile.phoneDisplayPrimary}</span>
               </li>
               {profile.phoneDisplaySecondary && (
-                <li className="flex items-center gap-2.5">
-                  <Phone className="w-4 h-4 text-[#C87A53] shrink-0" />
+                <li className="flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-amber-400 shrink-0" />
                   <span>{profile.phoneDisplaySecondary}</span>
                 </li>
               )}
-              <li className="flex items-center gap-2.5">
-                <Mail className="w-4 h-4 text-[#C87A53] shrink-0" />
+              <li className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-amber-400 shrink-0" />
                 <span className="truncate">{profile.email}</span>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#FAF6F0]/45">
+        <div className="pt-7 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <p>
-            © {year} {profile.brandName} · {profile.location}. All rights
-            reserved.
+            © {year} {profile.brandName} · {profile.location}
           </p>
           <Link
             href="/admin"
-            className="inline-flex items-center gap-1.5 text-[#FAF6F0]/55 hover:text-[#E5A989] transition-colors"
+            className="inline-flex items-center gap-1.5 text-slate-400 hover:text-indigo-300 transition-colors"
           >
             <Lock className="w-3 h-3" />
             <span>Studio Admin</span>

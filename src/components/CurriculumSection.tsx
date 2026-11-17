@@ -1,33 +1,28 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { Music2, Volume2 } from "lucide-react";
+import { Music2, Sparkles, Volume2 } from "lucide-react";
 
-const GAINS = [
+const LEARNING_HIGHLIGHTS = [
   {
-    num: "01",
-    title: "Technique & Healthy Posture",
-    body: "Relaxed wrists, curved fingers, and clean coordination from day one.",
+    emoji: "🎹",
+    title: "Comfortable Hands",
+    body: "Natural posture & finger control without tension.",
   },
   {
-    num: "02",
-    title: "Sheet Reading & Music Theory",
-    body: "Read treble and bass clefs naturally and understand the harmony behind every piece.",
+    emoji: "👂",
+    title: "Play by Ear",
+    body: "Pick up melodies and worship chords quickly.",
   },
   {
-    num: "03",
-    title: "Ear Training & Gospel Chords",
-    body: "Recognize progressions by ear, voice rich chords, and accompany singers smoothly.",
+    emoji: "🎼",
+    title: "Easy Sheet Reading",
+    body: "Read notes step-by-step with confidence.",
   },
   {
-    num: "04",
-    title: "Creativity & Improvisation",
-    body: "Move beyond memorizing notes to phrasing, dynamics, and making songs your own.",
-  },
-  {
-    num: "05",
-    title: "Stage & Recital Confidence",
-    body: "Calm, steady performance habits built through supportive studio feedback.",
+    emoji: "🌟",
+    title: "Stage Confidence",
+    body: "Perform smoothly for family, school, or church.",
   },
 ];
 
@@ -54,11 +49,11 @@ const KEYS: KeyDef[] = [
   { note: "C5", freq: 523.25, isBlack: false, label: "C5" },
 ];
 
-const CHORDS = [
-  { name: "C Maj7", notes: ["C4", "E4", "G4", "B4"] },
-  { name: "Am7", notes: ["A4", "C5", "E4", "G4"] },
-  { name: "F Maj7", notes: ["F4", "A4", "C5", "E4"] },
-  { name: "G6", notes: ["G4", "B4", "D4", "E4"] },
+const QUICK_PATTERNS = [
+  { label: "✨ Happy Riff", notes: ["C4", "E4", "G4", "C5", "G4", "C5"], gapMs: 160 },
+  { label: "🙌 Worship Chord", notes: ["C4", "E4", "G4", "B4"], gapMs: 55 },
+  { label: "🌟 Dreamy F Maj7", notes: ["F4", "A4", "C5", "E4"], gapMs: 55 },
+  { label: "🎵 Warm Am7", notes: ["A4", "C5", "E4", "G4"], gapMs: 55 },
 ];
 
 export default function CurriculumSection() {
@@ -85,10 +80,9 @@ export default function CurriculumSection() {
       const master = ctx.createGain();
       master.gain.setValueAtTime(0.001, now);
       master.gain.exponentialRampToValueAtTime(0.24, now + 0.015);
-      master.gain.exponentialRampToValueAtTime(0.0008, now + 1.35);
+      master.gain.exponentialRampToValueAtTime(0.0008, now + 1.2);
       master.connect(ctx.destination);
 
-      // Warm piano-like harmonic blend (fundamental + soft 2nd & 3rd overtones)
       const osc1 = ctx.createOscillator();
       osc1.type = "triangle";
       osc1.frequency.setValueAtTime(freq, now);
@@ -97,7 +91,7 @@ export default function CurriculumSection() {
       osc2.type = "sine";
       osc2.frequency.setValueAtTime(freq * 2, now);
       const gain2 = ctx.createGain();
-      gain2.gain.setValueAtTime(0.28, now);
+      gain2.gain.setValueAtTime(0.25, now);
 
       osc1.connect(master);
       osc2.connect(gain2);
@@ -105,25 +99,25 @@ export default function CurriculumSection() {
 
       osc1.start(now);
       osc2.start(now);
-      osc1.stop(now + 1.4);
-      osc2.stop(now + 1.4);
+      osc1.stop(now + 1.25);
+      osc2.stop(now + 1.25);
 
       setActiveNotes((prev) =>
         prev.includes(noteName) ? prev : [...prev, noteName]
       );
       setTimeout(() => {
         setActiveNotes((prev) => prev.filter((n) => n !== noteName));
-      }, 320);
+      }, 300);
     } catch {
-      // Ignore audio context errors if browser blocks audio
+      // Ignore if audio context blocked
     }
   }, []);
 
-  const playChord = (notes: string[]) => {
+  const playPattern = (notes: string[], gapMs: number) => {
     notes.forEach((n, idx) => {
       const found = KEYS.find((k) => k.note === n);
       if (found) {
-        setTimeout(() => playTone(found.note, found.freq), idx * 45);
+        setTimeout(() => playTone(found.note, found.freq), idx * gapMs);
       }
     });
   };
@@ -133,72 +127,81 @@ export default function CurriculumSection() {
   return (
     <section
       id="curriculum"
-      className="py-20 sm:py-28 bg-[#14110F] text-[#FAF6F0]"
+      className="py-16 sm:py-24 bg-[#0F172A] text-white relative overflow-hidden"
     >
-      <div className="max-w-7xl mx-auto px-5 sm:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-          {/* Left: 5 Core Outcomes */}
-          <div className="lg:col-span-6">
-            <span className="inline-block text-xs font-mono-meta uppercase tracking-[0.2em] text-[#E5A989] mb-3">
-              What You’ll Master
-            </span>
-            <h2 className="font-serif-display text-4xl sm:text-5xl leading-[1.08] mb-10">
-              Skills that last{" "}
-              <em className="italic text-[#C87A53]">a lifetime</em>
-            </h2>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-24 right-0 w-96 h-96 rounded-full bg-indigo-500/20 blur-3xl"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-24 left-0 w-80 h-80 rounded-full bg-amber-500/15 blur-3xl"
+      />
 
-            <div className="divide-y divide-white/10 border-t border-b border-white/10">
-              {GAINS.map((item) => (
-                <div key={item.num} className="py-5 flex gap-5 items-start">
-                  <span className="font-serif-display text-2xl sm:text-3xl text-[#C87A53] leading-none w-9 shrink-0 pt-0.5">
-                    {item.num}
-                  </span>
-                  <div>
-                    <h3 className="font-serif-display text-xl text-[#FAF6F0] mb-1">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm text-[#FAF6F0]/65 leading-relaxed">
-                      {item.body}
-                    </p>
-                  </div>
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+          {/* Left: Concise Visual Highlights */}
+          <div className="lg:col-span-5 space-y-6">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 text-xs font-semibold">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>Interactive Sound Lab</span>
+            </span>
+            <h2 className="font-display font-bold text-3xl sm:text-5xl leading-tight">
+              Play your first{" "}
+              <span className="text-amber-400">notes right here</span>
+            </h2>
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
+              Music should feel fun from day one. Tap any key or try a quick
+              chord on the keyboard to hear how lessons start.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
+              {LEARNING_HIGHLIGHTS.map((item) => (
+                <div
+                  key={item.title}
+                  className="rounded-2xl bg-white/5 border border-white/10 p-4"
+                >
+                  <div className="text-xl mb-1.5">{item.emoji}</div>
+                  <h3 className="font-display font-bold text-base text-white">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                    {item.body}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Right: Interactive Mini Piano + Styles Offered */}
-          <div className="lg:col-span-6 space-y-6">
-            {/* Playable Soundboard Card */}
-            <div className="rounded-2xl sm:rounded-3xl bg-[#1E1916] border border-white/10 p-6 sm:p-8 shadow-2xl">
+          {/* Right: Playable Soundboard */}
+          <div className="lg:col-span-7">
+            <div className="rounded-3xl bg-slate-900/90 border border-white/15 p-5 sm:p-8 shadow-2xl">
               <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-                <div>
-                  <div className="inline-flex items-center gap-1.5 text-[11px] font-mono-meta uppercase tracking-[0.16em] text-[#E5A989]">
-                    <Volume2 className="w-3.5 h-3.5" />
-                    <span>Interactive Sound Check</span>
-                  </div>
-                  <h3 className="font-serif-display text-2xl sm:text-3xl mt-1">
-                    Tap the keys or try a chord
-                  </h3>
+                <div className="flex items-center gap-2 text-xs font-semibold text-indigo-300">
+                  <Volume2 className="w-4 h-4 text-amber-400" />
+                  <span>Tap a button or play the keys</span>
                 </div>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-[11px] font-medium text-slate-200">
+                  <Music2 className="w-3 h-3 text-amber-400" />
+                  Classical · Gospel · Pop
+                </span>
               </div>
 
-              {/* Chord Presets */}
               <div className="flex flex-wrap gap-2 mb-6">
-                {CHORDS.map((chord) => (
+                {QUICK_PATTERNS.map((pat) => (
                   <button
-                    key={chord.name}
+                    key={pat.label}
                     type="button"
-                    onClick={() => playChord(chord.notes)}
-                    className="px-3.5 py-1.5 rounded-full bg-white/5 hover:bg-[#C87A53] border border-white/15 hover:border-[#C87A53] text-xs font-mono-meta text-[#FAF6F0] transition-colors cursor-pointer"
+                    onClick={() => playPattern(pat.notes, pat.gapMs)}
+                    className="px-3.5 py-2 rounded-full bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-400/30 text-xs font-semibold text-white transition-all cursor-pointer shadow-xs"
                   >
-                    ♪ {chord.name}
+                    {pat.label}
                   </button>
                 ))}
               </div>
 
-              {/* Playable 1-Octave Piano */}
-              <div className="relative select-none bg-[#14110F] p-3 rounded-2xl border border-white/10">
-                <div className="relative grid grid-cols-8 gap-1.5 h-40 sm:h-48">
+              <div className="relative select-none bg-slate-950 p-3 rounded-2xl border border-white/10">
+                <div className="relative grid grid-cols-8 gap-1.5 h-44 sm:h-52">
                   {whiteKeys.map((key) => {
                     const isActive = activeNotes.includes(key.note);
                     return (
@@ -206,10 +209,10 @@ export default function CurriculumSection() {
                         key={key.note}
                         type="button"
                         onPointerDown={() => playTone(key.note, key.freq)}
-                        className={`relative rounded-b-lg rounded-t-sm flex items-end justify-center pb-2.5 text-[11px] font-mono-meta transition-all cursor-pointer ${
+                        className={`relative rounded-b-xl rounded-t-sm flex items-end justify-center pb-3 text-xs font-mono-meta font-semibold transition-all cursor-pointer ${
                           isActive
-                            ? "bg-[#E5A989] text-[#14110F] translate-y-0.5"
-                            : "bg-[#FAF6F0] hover:bg-[#F2EAE0] text-[#6E5A4F]"
+                            ? "bg-amber-300 text-slate-950 translate-y-0.5 shadow-inner"
+                            : "bg-white hover:bg-indigo-50 text-slate-500"
                         }`}
                       >
                         {key.label}
@@ -217,7 +220,6 @@ export default function CurriculumSection() {
                     );
                   })}
 
-                  {/* Black keys positioned accurately above C-D, D-E, F-G, G-A, A-B */}
                   {[
                     { note: "C#4", freq: 277.18, leftPct: "9.2%" },
                     { note: "D#4", freq: 311.13, leftPct: "21.8%" },
@@ -236,41 +238,16 @@ export default function CurriculumSection() {
                           playTone(bk.note, bk.freq);
                         }}
                         style={{ left: bk.leftPct }}
-                        className={`absolute top-0 w-[8.5%] h-[60%] rounded-b-md border border-white/10 shadow-md z-10 transition-all cursor-pointer ${
+                        className={`absolute top-0 w-[8.5%] h-[58%] rounded-b-lg border border-slate-700 shadow-lg z-10 transition-all cursor-pointer ${
                           isActive
-                            ? "bg-[#C87A53] translate-y-0.5"
-                            : "bg-[#1B1613] hover:bg-[#2F2722]"
+                            ? "bg-indigo-500 translate-y-0.5"
+                            : "bg-slate-900 hover:bg-slate-800"
                         }`}
                       />
                     );
                   })}
                 </div>
               </div>
-
-              <p className="text-xs text-[#FAF6F0]/50 mt-4">
-                Built with live Web Audio synthesis — try tapping the progression{" "}
-                <span className="text-[#E5A989]">C Maj7 → Am7 → F Maj7 → G6</span>.
-              </p>
-            </div>
-
-            {/* Primary Instrument & Styles Card */}
-            <div className="rounded-2xl bg-[#C87A53]/12 border border-[#C87A53]/35 p-6 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-[#C87A53] text-white flex items-center justify-center shrink-0">
-                  <Music2 className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="font-serif-display text-2xl text-[#FAF6F0]">
-                    Piano & Keyboard
-                  </div>
-                  <div className="text-xs sm:text-sm text-[#FAF6F0]/70 mt-0.5">
-                    Classical · Contemporary · Gospel · Pop · Ear Training
-                  </div>
-                </div>
-              </div>
-              <span className="hidden sm:inline-block px-3 py-1 rounded-full bg-[#C87A53] text-white text-[10px] font-mono-meta uppercase tracking-[0.14em]">
-                Primary Focus
-              </span>
             </div>
           </div>
         </div>

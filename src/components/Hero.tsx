@@ -9,13 +9,11 @@ interface HeroProps {
   onToggleMusic: () => void;
 }
 
-const MARQUEE_TAGS = [
-  "1-on-1 Piano Coaching",
-  "Children, Teens & Adults",
-  "Entebbe, Uganda",
-  "Classical · Contemporary · Gospel",
-  "Sheet Reading & Playing by Ear",
-  "Flexible Weekday & Saturday Slots",
+const AUDIENCE_CHIPS = [
+  { label: "Kids (5–11)", dot: "bg-rose-500" },
+  { label: "Teens (12–17)", dot: "bg-indigo-500" },
+  { label: "Adults (18+)", dot: "bg-emerald-500" },
+  { label: "Zero Experience Welcome", dot: "bg-amber-500" },
 ];
 
 export default function Hero({
@@ -26,91 +24,77 @@ export default function Hero({
   return (
     <section
       id="home"
-      className="relative bg-[#14110F] text-[#FAF6F0] pt-28 sm:pt-32 overflow-hidden"
+      className="relative bg-gradient-to-br from-[#F4F7FF] via-white to-[#FFF8EC] pt-24 sm:pt-28 pb-16 sm:pb-24 overflow-hidden"
     >
-      {/* Subtle warm radial glow */}
+      {/* Bright soft background glows */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[#C87A53]/20 blur-3xl"
+        className="pointer-events-none absolute -top-24 -left-24 w-96 h-96 rounded-full bg-indigo-200/45 blur-3xl"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-12 right-0 w-80 h-80 rounded-full bg-[#C87A53]/10 blur-3xl"
+        className="pointer-events-none absolute top-1/3 -right-24 w-96 h-96 rounded-full bg-amber-200/45 blur-3xl"
       />
 
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 pb-14 sm:pb-20 lg:py-16">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
           {/* Left Copy */}
-          <div className="lg:col-span-6 space-y-6 sm:space-y-7 relative z-10">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#C87A53]/40 bg-[#C87A53]/10 text-[#E5A989] text-xs font-mono-meta uppercase tracking-[0.16em]">
-              <MapPin className="w-3.5 h-3.5" />
+          <div className="lg:col-span-6 space-y-6">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-semibold">
+              <MapPin className="w-3.5 h-3.5 text-indigo-600" />
               <span>{profile.heroTag}</span>
             </div>
 
-            <h1 className="font-serif-display text-5xl sm:text-6xl lg:text-7xl xl:text-[5.25rem] leading-[0.95] tracking-tight text-[#FAF6F0]">
-              {profile.heroTitleLine1}
-              <br />
-              {profile.heroTitleLine2}
-              <br />
-              <em className="italic text-[#C87A53]">
-                {profile.heroTitleAccent}
-              </em>
+            <h1 className="font-display font-extrabold text-5xl sm:text-6xl lg:text-[4.25rem] leading-[1.02] tracking-tight text-slate-900">
+              {profile.heroTitleLine1}{" "}
+              <span className="block mt-1">
+                {profile.heroTitleLine2}{" "}
+                <span className="bg-gradient-to-r from-[#4F46E5] via-[#6366F1] to-[#F59E0B] bg-clip-text text-transparent">
+                  {profile.heroTitleAccent}
+                </span>
+              </span>
             </h1>
 
-            <p className="text-base sm:text-lg text-[#FAF6F0]/75 leading-relaxed max-w-xl">
+            <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl">
               {profile.heroSubtitle}
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3.5 pt-1">
+            {/* Friendly audience pills */}
+            <div className="flex flex-wrap gap-2">
+              {AUDIENCE_CHIPS.map((chip) => (
+                <span
+                  key={chip.label}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 shadow-xs text-xs font-medium text-slate-700"
+                >
+                  <span className={`w-2 h-2 rounded-full ${chip.dot}`} />
+                  {chip.label}
+                </span>
+              ))}
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 pt-1">
               <a
                 href="#booking"
-                className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-full bg-[#C87A53] hover:bg-[#B56542] text-white text-xs sm:text-sm font-semibold uppercase tracking-[0.12em] transition-all shadow-lg shadow-[#C87A53]/20"
+                className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold transition-all shadow-lg shadow-indigo-500/25"
               >
                 <span>Book a Trial Lesson</span>
                 <ArrowRight className="w-4 h-4" />
               </a>
               <a
-                href="#classes"
-                className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full border border-white/20 hover:border-[#C87A53] hover:bg-white/5 text-[#FAF6F0] text-xs sm:text-sm font-semibold uppercase tracking-[0.12em] transition-all"
+                href="#curriculum"
+                className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 text-sm font-semibold transition-all shadow-xs"
               >
-                <span>Explore Classes</span>
+                <Sparkles className="w-4 h-4 text-amber-500" />
+                <span>Try the Live Piano</span>
               </a>
-            </div>
-
-            {/* Studio Proof Strip */}
-            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/10 max-w-lg">
-              <div>
-                <div className="font-serif-display text-2xl sm:text-3xl text-[#FAF6F0]">
-                  1:1
-                </div>
-                <div className="text-[11px] uppercase tracking-[0.12em] text-[#FAF6F0]/55 mt-0.5">
-                  Private Coaching
-                </div>
-              </div>
-              <div>
-                <div className="font-serif-display text-2xl sm:text-3xl text-[#FAF6F0]">
-                  All Ages
-                </div>
-                <div className="text-[11px] uppercase tracking-[0.12em] text-[#FAF6F0]/55 mt-0.5">
-                  Kids, Teens & Adults
-                </div>
-              </div>
-              <div>
-                <div className="font-serif-display text-2xl sm:text-3xl text-[#FAF6F0]">
-                  Flex
-                </div>
-                <div className="text-[11px] uppercase tracking-[0.12em] text-[#FAF6F0]/55 mt-0.5">
-                  Studio Scheduling
-                </div>
-              </div>
             </div>
           </div>
 
-          {/* Right Media Card */}
+          {/* Right Video Stage */}
           <div className="lg:col-span-6 relative">
-            <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-white/15 bg-[#1E1916] shadow-2xl aspect-[4/3] sm:aspect-[16/11] lg:aspect-[5/5]">
+            <div className="relative rounded-3xl overflow-hidden border-4 border-white bg-slate-900 shadow-2xl shadow-indigo-950/15 aspect-[4/3] sm:aspect-[16/11] lg:aspect-[5/4]">
               <video
-                className="w-full h-full object-cover opacity-85"
+                className="w-full h-full object-cover"
                 autoPlay
                 muted
                 loop
@@ -123,70 +107,60 @@ export default function Hero({
 
               <div
                 aria-hidden="true"
-                className="absolute inset-0 bg-gradient-to-t from-[#14110F] via-[#14110F]/20 to-transparent"
+                className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-slate-950/15"
               />
 
-              {/* Top-right studio audio toggle inside card */}
+              {/* Top-left floating sparkle pill */}
+              <div className="absolute top-4 left-4 animate-float-slow inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-400 text-slate-950 text-xs font-bold shadow-md">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Beginner Friendly</span>
+              </div>
+
+              {/* Top-right studio audio toggle */}
               <button
                 type="button"
                 onClick={onToggleMusic}
-                className="absolute top-4 right-4 inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-[#14110F]/80 hover:bg-[#14110F] backdrop-blur-md border border-white/15 text-xs font-medium text-[#FAF6F0] transition-all cursor-pointer"
+                className="absolute top-4 right-4 inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-slate-900/75 hover:bg-slate-900 backdrop-blur-md border border-white/20 text-xs font-medium text-white transition-all cursor-pointer"
               >
                 {isMusicPlaying ? (
                   <>
-                    <Volume2 className="w-3.5 h-3.5 text-[#C87A53]" />
-                    <span>Studio Jazz On</span>
+                    <Volume2 className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Music On</span>
                     <span className="flex items-end gap-0.5 h-3">
-                      <span className="w-0.5 h-full bg-[#C87A53] rounded-full eq-bar-1 origin-bottom" />
-                      <span className="w-0.5 h-full bg-[#C87A53] rounded-full eq-bar-2 origin-bottom" />
-                      <span className="w-0.5 h-full bg-[#C87A53] rounded-full eq-bar-3 origin-bottom" />
+                      <span className="w-0.5 h-full bg-amber-400 rounded-full eq-bar-1 origin-bottom" />
+                      <span className="w-0.5 h-full bg-amber-400 rounded-full eq-bar-2 origin-bottom" />
+                      <span className="w-0.5 h-full bg-amber-400 rounded-full eq-bar-3 origin-bottom" />
                     </span>
                   </>
                 ) : (
                   <>
-                    <VolumeX className="w-3.5 h-3.5 text-white/70" />
-                    <span>Play Studio Audio</span>
+                    <VolumeX className="w-3.5 h-3.5 text-white/75" />
+                    <span>Play Studio Music</span>
                   </>
                 )}
               </button>
 
-              {/* Bottom teacher badge safely inset inside card */}
-              <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 flex flex-wrap items-end justify-between gap-4">
-                <div className="bg-[#FAF6F0]/95 text-[#14110F] px-4 py-3 sm:px-5 sm:py-3.5 rounded-xl shadow-lg backdrop-blur-md">
-                  <div className="flex items-center gap-1.5 text-[11px] font-mono-meta uppercase tracking-[0.14em] text-[#A65C38]">
-                    <Sparkles className="w-3 h-3" />
-                    <span>Your Instructor</span>
+              {/* Bottom badge + Watch button */}
+              <div className="absolute bottom-4 left-4 right-4 sm:bottom-5 sm:left-5 sm:right-5 flex flex-wrap items-end justify-between gap-3">
+                <div className="bg-white/95 backdrop-blur-md text-slate-900 px-4 py-2.5 rounded-2xl shadow-lg">
+                  <div className="text-[10px] font-mono-meta uppercase tracking-[0.14em] text-indigo-600 font-semibold">
+                    1-on-1 Coach · {profile.location}
                   </div>
-                  <div className="font-serif-display text-2xl sm:text-3xl leading-none mt-1">
+                  <div className="font-display font-bold text-xl sm:text-2xl leading-tight">
                     {profile.teacherName}
                   </div>
                 </div>
 
                 <a
                   href="#videos"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/20 text-xs font-medium text-white transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-xs font-semibold text-white transition-colors"
                 >
                   <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>Watch Lessons</span>
+                  <span>Watch Clips</span>
                 </a>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Marquee Ribbon */}
-      <div className="border-t border-white/10 bg-[#1E1916] py-3.5 overflow-hidden">
-        <div className="animate-marquee">
-          {[...MARQUEE_TAGS, ...MARQUEE_TAGS].map((tag, idx) => (
-            <span
-              key={idx}
-              className="inline-flex items-center gap-6 px-6 text-xs font-mono-meta uppercase tracking-[0.18em] text-[#E5A989]/90 whitespace-nowrap"
-            >
-              <span>♪</span>
-              <span>{tag}</span>
-            </span>
-          ))}
         </div>
       </div>
     </section>

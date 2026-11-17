@@ -56,33 +56,33 @@ export default function AdminLogin({
   };
 
   return (
-    <div className="min-h-screen bg-[#14110F] text-[#FAF6F0] flex flex-col items-center justify-center p-5">
+    <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-5">
       <div className="w-full max-w-md space-y-6">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-xs font-mono-meta uppercase tracking-[0.14em] text-[#FAF6F0]/60 hover:text-[#E5A989] transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-mono-meta uppercase tracking-[0.14em] text-slate-400 hover:text-indigo-300 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to Website</span>
         </Link>
 
-        <div className="rounded-3xl bg-[#1E1916] border border-white/10 p-7 sm:p-9 shadow-2xl space-y-6">
+        <div className="rounded-3xl bg-slate-900 border border-slate-800 p-7 sm:p-9 shadow-2xl space-y-6">
           <div className="flex items-center gap-3">
-            <span className="w-11 h-11 rounded-xl bg-[#C87A53] text-white flex items-center justify-center">
+            <span className="w-11 h-11 rounded-xl bg-[#4F46E5] text-white flex items-center justify-center">
               <Music className="w-5 h-5" />
             </span>
             <div>
-              <h1 className="font-serif-display text-3xl text-[#FAF6F0]">
+              <h1 className="font-display font-bold text-3xl text-white">
                 Studio Admin
               </h1>
-              <p className="text-xs text-[#FAF6F0]/60">
-                Enter your 6-digit PIN to manage classes, videos & guides
+              <p className="text-xs text-slate-400">
+                Enter your 6-digit PIN to manage classes, videos & tips
               </p>
             </div>
           </div>
 
           {isLocalFallback && (
-            <div className="rounded-xl bg-[#C87A53]/15 border border-[#C87A53]/35 px-4 py-3 text-xs text-[#E5A989] leading-relaxed">
+            <div className="rounded-xl bg-indigo-950/70 border border-indigo-500/35 px-4 py-3 text-xs text-indigo-200 leading-relaxed">
               Local dev mode (no <code className="font-mono-meta">.env.local</code> PIN set): use <code className="font-mono-meta">000000</code>, then set your own PIN inside Studio Admin.
             </div>
           )}
@@ -97,7 +97,7 @@ export default function AdminLogin({
             <div>
               <label
                 htmlFor="admin-pin"
-                className="block text-[11px] font-mono-meta uppercase tracking-[0.14em] text-[#FAF6F0]/70 mb-2"
+                className="block text-[11px] font-mono-meta uppercase tracking-[0.14em] text-slate-300 mb-2"
               >
                 6-Digit Studio PIN
               </label>
@@ -113,13 +113,13 @@ export default function AdminLogin({
                   value={pin}
                   onChange={(e) => handlePinChange(e.target.value)}
                   placeholder="••••••"
-                  className="w-full px-4 py-3.5 pr-11 rounded-xl bg-[#14110F] border border-white/15 focus:border-[#C87A53] focus:outline-none text-[#FAF6F0] font-mono-meta text-center text-2xl tracking-[0.45em]"
+                  className="w-full px-4 py-3.5 pr-11 rounded-xl bg-slate-950 border border-slate-700 focus:border-[#4F46E5] focus:outline-none text-white font-mono-meta text-center text-2xl tracking-[0.45em]"
                 />
                 <button
                   type="button"
                   aria-label={showPin ? "Hide PIN" : "Show PIN"}
                   onClick={() => setShowPin((p) => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#FAF6F0]/50 hover:text-[#FAF6F0] cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
                 >
                   {showPin ? (
                     <EyeOff className="w-4 h-4" />
@@ -133,7 +133,7 @@ export default function AdminLogin({
             <button
               type="submit"
               disabled={loading || pin.length !== 6}
-              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#C87A53] hover:bg-[#B56542] disabled:opacity-50 text-white text-xs font-semibold uppercase tracking-[0.14em] transition-colors cursor-pointer"
+              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] disabled:opacity-50 text-white text-xs font-semibold uppercase tracking-[0.14em] transition-colors cursor-pointer"
             >
               <Lock className="w-3.5 h-3.5" />
               <span>{loading ? "Verifying PIN..." : "Unlock Studio Admin"}</span>

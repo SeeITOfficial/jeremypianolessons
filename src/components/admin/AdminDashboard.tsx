@@ -228,14 +228,14 @@ export default function AdminDashboard({
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAF6F0] text-[#14110F]">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900">
       {/* Sticky Top Admin Bar */}
-      <header className="sticky top-0 z-40 bg-[#14110F] text-[#FAF6F0] border-b border-white/10">
+      <header className="sticky top-0 z-40 bg-slate-950 text-white border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 py-4 flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-serif-display text-2xl sm:text-3xl">
+            <h1 className="font-display font-bold text-2xl sm:text-3xl">
               {content.profile.brandName}{" "}
-              <em className="italic text-[#C87A53]">Admin</em>
+              <span className="text-indigo-400">Admin</span>
             </h1>
             <span
               className={`px-3 py-1 rounded-full border text-[11px] font-mono-meta ${modeBadge.style}`}
@@ -248,7 +248,7 @@ export default function AdminDashboard({
             <Link
               href="/"
               target="_blank"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-white/20 hover:border-[#C87A53] text-xs font-medium text-[#FAF6F0] transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-700 hover:border-indigo-400 text-xs font-medium text-white transition-colors"
             >
               <span>View Site</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -260,7 +260,7 @@ export default function AdminDashboard({
               disabled={saving}
               className={`inline-flex items-center gap-2 px-5 py-2 rounded-full text-xs font-semibold uppercase tracking-[0.12em] transition-colors cursor-pointer ${
                 dirty
-                  ? "bg-[#C87A53] hover:bg-[#B56542] text-white shadow-lg"
+                  ? "bg-[#4F46E5] hover:bg-[#4338CA] text-white shadow-lg"
                   : "bg-white/15 hover:bg-white/25 text-white"
               }`}
             >
@@ -271,7 +271,7 @@ export default function AdminDashboard({
             <button
               type="button"
               onClick={onLogout}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-white/15 hover:bg-white/10 text-xs text-[#FAF6F0]/75 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-slate-700 hover:bg-white/10 text-xs text-slate-300 cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Sign Out</span>
@@ -280,7 +280,7 @@ export default function AdminDashboard({
         </div>
 
         {/* Navigation Tabs */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 flex gap-1 overflow-x-auto pb-0 border-t border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 flex gap-1 overflow-x-auto pb-0 border-t border-slate-800">
           {tabs.map((tab) => {
             const active = activeTab === tab.id;
             return (
@@ -290,8 +290,8 @@ export default function AdminDashboard({
                 onClick={() => setActiveTab(tab.id)}
                 className={`inline-flex items-center gap-2 px-4 py-3 text-xs font-semibold uppercase tracking-[0.1em] border-b-2 whitespace-nowrap transition-colors cursor-pointer ${
                   active
-                    ? "border-[#C87A53] text-[#E5A989]"
-                    : "border-transparent text-[#FAF6F0]/60 hover:text-[#FAF6F0]"
+                    ? "border-indigo-400 text-indigo-300"
+                    : "border-transparent text-slate-400 hover:text-white"
                 }`}
               >
                 {tab.icon}

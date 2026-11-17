@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Menu, Music, X } from "lucide-react";
+import { Menu, Music, Sparkles, X } from "lucide-react";
 import type { StudioProfile } from "@/lib/types";
 
 interface NavbarProps {
@@ -10,10 +10,9 @@ interface NavbarProps {
 
 const NAV_ITEMS = [
   { label: "Classes", href: "#classes" },
-  { label: "Curriculum", href: "#curriculum" },
+  { label: "Sound Lab", href: "#curriculum" },
   { label: "About", href: "#about" },
   { label: "Videos", href: "#videos" },
-  { label: "Guides", href: "#guides" },
   { label: "FAQ", href: "#faq" },
 ];
 
@@ -22,7 +21,7 @@ export default function Navbar({ profile }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 80);
+    const onScroll = () => setScrolled(window.scrollY > 20);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -36,8 +35,8 @@ export default function Navbar({ profile }: NavbarProps) {
     <header
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-[#FAF6F0]/92 backdrop-blur-md border-b border-[#C87A53]/20 shadow-sm"
-          : "bg-[#14110F]/65 backdrop-blur-md border-b border-white/10"
+          ? "bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-sm"
+          : "bg-white/75 backdrop-blur-md border-b border-slate-200/40"
       }`}
     >
       <nav className="max-w-7xl mx-auto px-5 sm:px-8 h-16 sm:h-18 flex items-center justify-between gap-6">
@@ -46,22 +45,12 @@ export default function Navbar({ profile }: NavbarProps) {
           className="flex items-center gap-2.5 group shrink-0"
           onClick={() => setOpen(false)}
         >
-          <span
-            className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${
-              scrolled
-                ? "bg-[#14110F] text-[#FAF6F0]"
-                : "bg-[#C87A53] text-white"
-            }`}
-          >
+          <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#4F46E5] to-[#6366F1] text-white flex items-center justify-center shadow-sm shadow-indigo-500/25">
             <Music className="w-4 h-4" />
           </span>
-          <span
-            className={`font-serif-display text-2xl tracking-tight transition-colors ${
-              scrolled ? "text-[#14110F]" : "text-[#FAF6F0]"
-            }`}
-          >
+          <span className="font-display font-bold text-xl sm:text-2xl tracking-tight text-slate-900">
             {firstWord}{" "}
-            <em className="italic text-[#C87A53]">{restWords}</em>
+            <span className="text-[#4F46E5]">{restWords}</span>
           </span>
         </a>
 
@@ -70,9 +59,7 @@ export default function Navbar({ profile }: NavbarProps) {
             <li key={item.href}>
               <a
                 href={item.href}
-                className={`text-xs font-medium uppercase tracking-[0.14em] transition-colors hover:text-[#C87A53] ${
-                  scrolled ? "text-[#57473E]" : "text-[#FAF6F0]/80"
-                }`}
+                className="text-sm font-medium text-slate-600 hover:text-[#4F46E5] transition-colors"
               >
                 {item.label}
               </a>
@@ -83,9 +70,10 @@ export default function Navbar({ profile }: NavbarProps) {
         <div className="hidden lg:flex items-center gap-3">
           <a
             href="#booking"
-            className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-[#C87A53] hover:bg-[#A65C38] text-white text-xs font-semibold uppercase tracking-[0.12em] transition-colors shadow-sm"
+            className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold transition-all shadow-sm shadow-indigo-500/25"
           >
-            Book Trial Lesson
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Book Trial</span>
           </a>
         </div>
 
@@ -94,25 +82,21 @@ export default function Navbar({ profile }: NavbarProps) {
           aria-label={open ? "Close navigation menu" : "Open navigation menu"}
           aria-expanded={open}
           onClick={() => setOpen((prev) => !prev)}
-          className={`lg:hidden p-2 rounded-lg transition-colors ${
-            scrolled
-              ? "text-[#14110F] hover:bg-[#14110F]/5"
-              : "text-[#FAF6F0] hover:bg-white/10"
-          }`}
+          className="lg:hidden p-2 rounded-xl text-slate-800 hover:bg-slate-100 transition-colors"
         >
           {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </nav>
 
       {open && (
-        <div className="lg:hidden bg-[#FAF6F0] border-b border-[#C87A53]/20 px-6 py-6 shadow-xl">
+        <div className="lg:hidden bg-white border-b border-slate-200 px-6 py-5 shadow-xl">
           <div className="flex flex-col gap-1">
             {NAV_ITEMS.map((item) => (
               <a
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="py-3 text-sm font-medium uppercase tracking-[0.12em] text-[#1B1613] border-b border-[#C87A53]/15 hover:text-[#C87A53]"
+                className="py-3 text-base font-medium text-slate-800 border-b border-slate-100 hover:text-[#4F46E5]"
               >
                 {item.label}
               </a>
@@ -120,9 +104,10 @@ export default function Navbar({ profile }: NavbarProps) {
             <a
               href="#booking"
               onClick={() => setOpen(false)}
-              className="mt-4 inline-flex items-center justify-center px-5 py-3.5 rounded-full bg-[#14110F] text-[#FAF6F0] text-xs font-semibold uppercase tracking-[0.14em]"
+              className="mt-4 inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-full bg-[#4F46E5] text-white text-sm font-semibold"
             >
-              Book Trial Lesson
+              <Sparkles className="w-4 h-4" />
+              <span>Book a Trial Lesson</span>
             </a>
           </div>
         </div>
