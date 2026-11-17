@@ -1,0 +1,240 @@
+{
+  "profile": {
+    "brandName": "Jeremy Piano",
+    "teacherName": "Jeremy",
+    "location": "Entebbe, Uganda",
+    "heroTag": "Private Piano Studio · Entebbe, Uganda",
+    "heroTitleLine1": "Inspire.",
+    "heroTitleLine2": "Learn.",
+    "heroTitleAccent": "Play.",
+    "heroSubtitle": "Modern, patient 1-on-1 piano coaching in Entebbe — helping children, teens, and adults move from first notes to confident musicianship.",
+    "aboutHeadline": "Inspiring a lifelong love of music",
+    "aboutParagraph1": "Based in Entebbe, I run a warm, structured piano studio built around one simple idea: anyone can learn to play expressively when technique and musical joy grow side by side.",
+    "aboutParagraph2": "Whether you are putting hands on the keys for the very first time, preparing for church worship or performances, or returning to music after years away, every lesson is paced around your goals.",
+    "aboutQuote": "Music is not just notes on a page. It is how we listen, express, and discover confidence.",
+    "aboutImageUrl": "https://images.unsplash.com/photo-1552422535-c45813c61732?w=900&q=85",
+    "whatsappPrimary": "256705576698",
+    "whatsappSecondary": "256771174942",
+    "phoneDisplayPrimary": "+256 705 576 698",
+    "phoneDisplaySecondary": "+256 771 174 942",
+    "email": "jeremiahbusinge6@gmail.com",
+    "youtubeChannelUrl": "https://youtube.com/@jeremypiano",
+    "instagramUrl": "",
+    "facebookUrl": "",
+    "teachingHours": "Mon – Sat · Flexible Morning, Afternoon & Evening Slots",
+    "pillars": [
+      {
+        "title": "Patient Pacing",
+        "description": "Every student learns at their natural rhythm, with zero rush or pressure."
+      },
+      {
+        "title": "Ear & Sheet Reading",
+        "description": "Learn both notation and playing by ear so you feel comfortable in any setting."
+      },
+      {
+        "title": "Tailored Repertoire",
+        "description": "Classical, contemporary, gospel, and pop songs chosen around what excites you."
+      },
+      {
+        "title": "Visible Progress",
+        "description": "Clear weekly milestones so students and parents can hear real improvement."
+      }
+    ]
+  },
+  "classes": [
+    {
+      "id": "children-foundations",
+      "title": "Young Beginners Studio",
+      "ageGroup": "Children",
+      "level": "Beginner",
+      "duration": "45 min / session",
+      "format": "In-Person · Entebbe",
+      "priceNote": "Ages 5–11 · 1-on-1",
+      "summary": "A joyful, structured introduction to the piano that builds finger coordination, rhythm, and confidence without turning practice into a chore.",
+      "highlights": [
+        "Note reading & foundational music theory through games",
+        "Healthy posture, hand shape, and finger independence",
+        "Playing familiar melodies & first recital pieces",
+        "Parent progress check-ins after lessons"
+      ],
+      "featured": false,
+      "published": true
+    },
+    {
+      "id": "teens-contemporary",
+      "title": "Teen Musicianship & Technique",
+      "ageGroup": "Teens",
+      "level": "All Levels",
+      "duration": "60 min / session",
+      "format": "In-Person · Entebbe",
+      "priceNote": "Ages 12–17 · 1-on-1",
+      "summary": "Designed for teens starting fresh or ready to level up — combining solid technique with chords, contemporary songs, and stage confidence.",
+      "highlights": [
+        "Contemporary, gospel, and classical repertoire building",
+        "Chord voicings, rhythm grooves, and accompaniment",
+        "Music theory & creative songwriting basics",
+        "School talent show, church, or exam preparation"
+      ],
+      "featured": true,
+      "published": true
+    },
+    {
+      "id": "adults-expressive",
+      "title": "Adult Piano & Ear Training",
+      "ageGroup": "Adults",
+      "level": "Beginner",
+      "duration": "60 min / session",
+      "format": "In-Person · Flexible",
+      "priceNote": "Ages 18+ · Stress-Free",
+      "summary": "Never too late to start. Practical, judgment-free sessions shaped around your schedule and the songs you actually want to sit down and play.",
+      "highlights": [
+        "Learn songs you love from week one",
+        "Play by ear, lead sheets, or traditional sheet music",
+        "Improvisation and relaxing creative expression",
+        "Flexible weekday evening & Saturday scheduling"
+      ],
+      "featured": false,
+      "published": true
+    },
+    {
+      "id": "worship-chords-lab",
+      "title": "Gospel, Worship & Accompaniment",
+      "ageGroup": "All Ages",
+      "level": "Intermediate",
+      "duration": "60 min / session",
+      "format": "In-Person · Entebbe",
+      "priceNote": "Church & Live Playing",
+      "summary": "Master smooth chord progressions, transitions, and playing in a live band or church setting with confidence and musical sensitivity.",
+      "highlights": [
+        "Rich gospel & contemporary chord voicings",
+        "Playing smoothly behind vocalists and choirs",
+        "Transposing keys on the fly & ear training",
+        "Dynamic control and live arrangement flow"
+      ],
+      "featured": false,
+      "published": true
+    }
+  ],
+  "videos": [
+    {
+      "id": "vid-first-notes",
+      "title": "Your First 5 Notes & Hand Posture on Piano",
+      "youtubeUrl": "",
+      "category": "Tutorial",
+      "duration": "4 min",
+      "description": "A clear walkthrough of relaxed wrist alignment, finger numbering, and your very first five-finger melody.",
+      "published": true
+    },
+    {
+      "id": "vid-sheet-music",
+      "title": "How to Read Sheet Music Faster Without Guessing",
+      "youtubeUrl": "",
+      "category": "Practice Tip",
+      "duration": "8 min",
+      "description": "Learn landmark notes and interval reading so your eyes flow effortlessly across the treble and bass clefs.",
+      "published": true
+    },
+    {
+      "id": "vid-student-showcase",
+      "title": "Entebbe Studio Student Showcase Highlights",
+      "youtubeUrl": "",
+      "category": "Student Showcase",
+      "duration": "6 min",
+      "description": "Watch students share the pieces they prepared across classical, gospel, and contemporary styles.",
+      "published": true
+    }
+  ],
+  "articles": [
+    {
+      "id": "adult-beginners-guide",
+      "title": "The Complete Beginner's Guide to Learning Piano as an Adult",
+      "category": "Beginner Guide",
+      "readTime": "4 min read",
+      "excerpt": "Starting piano as an adult is easier — and far more rewarding — than you think. Here is what your first 90 days look like.",
+      "coverImage": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=900&q=85",
+      "content": [
+        "One of the biggest myths in music is that you have to start piano at age six to ever play well. In reality, adult beginners often progress faster in their first few months because they understand why they are practicing and genuinely love the music they choose.",
+        "In your first four weeks, the goal is comfort — not speed. We focus on relaxed hand posture, finding patterns across the keyboard, and building steady rhythm with simple two-hand pieces that actually sound musical.",
+        "By month two and three, chords and familiar melodies click together. With just 15 focused minutes a day, most adults are surprised at how quickly they can sit down and play a piece they love from start to finish."
+      ],
+      "published": true
+    },
+    {
+      "id": "piano-makes-kids-sharper",
+      "title": "Why Learning Piano Builds Focus & Confidence in Children",
+      "category": "Music & Science",
+      "readTime": "3 min read",
+      "excerpt": "Coordinating both hands, listening closely, and reading rhythm exercises memory, patience, and self-assurance far beyond music.",
+      "coverImage": "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=900&q=85",
+      "content": [
+        "When a child sits at the piano, their brain is doing something remarkable: reading visual symbols, translating them into independent left- and right-hand movements, and listening in real time to adjust tone and timing.",
+        "Beyond coordination, private lessons teach children how small daily habits add up. Mastering a tricky bar of music over a week proves to a child that patience pays off — a mindset that carries straight into schoolwork and sports.",
+        "Above all, performing a piece for family or friends gives young learners quiet pride in something they built themselves."
+      ],
+      "published": true
+    },
+    {
+      "id": "practice-smarter-not-longer",
+      "title": "Practice Smarter, Not Longer: The 15-Minute Method",
+      "category": "Practice Tips",
+      "readTime": "4 min read",
+      "excerpt": "Fifteen focused minutes beats two distracted hours every time. Here is the exact warm-up and slow-practice routine I teach.",
+      "coverImage": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=900&q=85",
+      "content": [
+        "Most students sit down and play a song from the beginning until they hit a mistake, then restart from bar one. That trains the beginning brilliantly and leaves the middle shaky.",
+        "Instead, split 15 minutes into three blocks: 3 minutes of relaxed scales or finger warm-ups, 8 minutes isolating only the hardest 2–4 bars at half speed, and 4 minutes playing straight through for musical flow.",
+        "Slow, accurate repetition lets your hands learn effortlessly. When you come back the next day, your brain has already consolidated the movement."
+      ],
+      "published": true
+    }
+  ],
+  "testimonials": [
+    {
+      "id": "testi-amina",
+      "name": "Amina K.",
+      "role": "Adult beginner · Entebbe",
+      "quote": "I started with zero knowledge and within three months I was playing hymns at church. Jeremy has a gift for making every concept feel effortless.",
+      "rating": 5,
+      "published": true
+    },
+    {
+      "id": "testi-robert",
+      "name": "Robert M.",
+      "role": "Parent · Entebbe",
+      "quote": "My 8-year-old daughter looks forward to every single lesson. She went from nervous to performing confidently in front of the whole family.",
+      "rating": 5,
+      "published": true
+    },
+    {
+      "id": "testi-timothy",
+      "name": "Timothy O.",
+      "role": "Teen student",
+      "quote": "I had tried other teachers and always quit after a month. Jeremy's patience and the way he breaks down chords and theory changed everything for me.",
+      "rating": 5,
+      "published": true
+    }
+  ],
+  "faqs": [
+    {
+      "id": "faq-instrument",
+      "question": "Do I need to own a piano before starting lessons?",
+      "answer": "Not on day one. During your trial lesson we'll guide you on the best affordable keyboard or digital piano options in Uganda (weighted 61- or 88-key models) so you don't overspend."
+    },
+    {
+      "id": "faq-location",
+      "question": "Where in Entebbe are lessons held?",
+      "answer": "Lessons take place in-person in Entebbe, with flexible scheduling across weekdays and Saturdays. Message on WhatsApp to confirm studio directions or discuss nearby home-visit availability."
+    },
+    {
+      "id": "faq-experience",
+      "question": "Can I start as a complete beginner with zero music background?",
+      "answer": "Yes — most of our children and adult students start from scratch. You don't need to read sheet music beforehand; we build everything step by step."
+    },
+    {
+      "id": "faq-styles",
+      "question": "What styles of music can I learn?",
+      "answer": "You can focus on Classical foundations, Contemporary & Pop songs, Gospel & Church accompaniment, or a blend of reading music and playing by ear."
+    }
+  ],
+  "updatedAt": "2026-11-17T13:30:00.000Z"
+}
