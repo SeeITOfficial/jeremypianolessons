@@ -17,13 +17,13 @@ import type { ClassItem, StudioProfile } from "@/lib/types";
 interface BookingSectionProps {
   profile: StudioProfile;
   classes: ClassItem[];
-  preselectedClassTitle: string;
+  preselectedClassTitle?: string;
 }
 
 export default function BookingSection({
   profile,
   classes,
-  preselectedClassTitle,
+  preselectedClassTitle = "",
 }: BookingSectionProps) {
   const publishedClasses = classes.filter((c) => c.published);
 

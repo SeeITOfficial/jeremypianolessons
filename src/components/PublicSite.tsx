@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ClassItem, SiteContent } from "@/lib/types";
+import type { SiteContent } from "@/lib/types";
 import Navbar from "./Navbar";
 import Hero from "./Hero";
 import AboutSection from "./AboutSection";
@@ -22,7 +22,6 @@ interface PublicSiteProps {
 export default function PublicSite({ content }: PublicSiteProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-  const [preselectedClassTitle, setPreselectedClassTitle] = useState("");
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -57,14 +56,6 @@ export default function PublicSite({ content }: PublicSiteProps) {
     }
   }, []);
 
-  const handleSelectClassForBooking = useCallback((classItem: ClassItem) => {
-    setPreselectedClassTitle(classItem.title);
-    const target = document.getElementById("booking");
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth" });
-    }
-  }, []);
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar profile={content.profile} />
@@ -80,7 +71,7 @@ export default function PublicSite({ content }: PublicSiteProps) {
 
         <ClassesSection
           classes={content.classes}
-          onSelectClassForBooking={handleSelectClassForBooking}
+          profile={content.profile}
         />
 
         <CurriculumSection />
@@ -96,7 +87,6 @@ export default function PublicSite({ content }: PublicSiteProps) {
         <BookingSection
           profile={content.profile}
           classes={content.classes}
-          preselectedClassTitle={preselectedClassTitle}
         />
       </main>
 

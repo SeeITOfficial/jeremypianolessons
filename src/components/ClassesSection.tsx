@@ -8,16 +8,17 @@ import {
   Clock,
   Headphones,
   MapPin,
+  MessageCircle,
   Music2,
   Sparkles,
   Users,
   X,
 } from "lucide-react";
-import type { AgeGroup, ClassItem } from "@/lib/types";
+import type { AgeGroup, ClassItem, StudioProfile } from "@/lib/types";
 
 interface ClassesSectionProps {
   classes: ClassItem[];
-  onSelectClassForBooking: (classItem: ClassItem) => void;
+  profile: StudioProfile;
 }
 
 const AGE_FILTERS: Array<"All" | AgeGroup> = [
@@ -59,7 +60,7 @@ function getTrackTheme(ageGroup: AgeGroup) {
 
 export default function ClassesSection({
   classes,
-  onSelectClassForBooking,
+  profile,
 }: ClassesSectionProps) {
   const publishedClasses = useMemo(
     () => classes.filter((c) => c.published),
@@ -74,6 +75,12 @@ export default function ClassesSection({
     if (activeFilter === "All") return publishedClasses;
     return publishedClasses.filter((c) => c.ageGroup === activeFilter);
   }, [publishedClasses, activeFilter]);
+
+  const waDigits = profile.whatsappPrimary.replace(/[^\d]/g, "");
+  const buildClassWhatsAppUrl = (cls: ClassItem) => {
+    const msg = `Hi ${profile.teacherName}, I found you on your website and I'd love to book the "${cls.title}" class (${cls.ageGroup} · ${cls.level} · ${cls.duration})!`;
+    return `https://wa.me/${waDigits}?text=${encodeURIComponent(msg)}`;
+  };
 
   return (
     <section id="classes" className="py-16 sm:py-24 bg-[#141622] border-t border-white/10">
@@ -191,14 +198,16 @@ export default function ClassesSection({
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2.5">
-                    <button
-                      type="button"
-                      onClick={() => onSelectClassForBooking(cls)}
-                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-semibold transition-colors cursor-pointer"
+                    <a
+                      href={buildClassWhatsAppUrl(cls)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-semibold transition-colors"
                     >
+                      <MessageCircle className="w-3.5 h-3.5" />
                       <span>Book This Class</span>
                       <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
+                    </a>
 
                     <button
                       type="button"
@@ -274,18 +283,17 @@ export default function ClassesSection({
               ))}
             </ul>
 
-            <button
-              type="button"
-              onClick={() => {
-                const target = selectedModalClass;
-                setSelectedModalClass(null);
-                onSelectClassForBooking(target);
-              }}
-              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-semibold transition-colors cursor-pointer"
+            <a
+              href={buildClassWhatsAppUrl(selectedModalClass)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setSelectedModalClass(null)}
+              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-semibold transition-colors"
             >
-              <span>Book Trial for This Class</span>
+              <MessageCircle className="w-4 h-4" />
+              <span>Book This Class on WhatsApp</span>
               <ArrowRight className="w-4 h-4" />
-            </button>
+            </a>
           </div>
         </div>
       )}
