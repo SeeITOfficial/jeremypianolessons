@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Menu, Music, Sparkles, X } from "lucide-react";
+import { Menu, Sparkles, X } from "lucide-react";
 import type { StudioProfile } from "@/lib/types";
 
 interface NavbarProps {
@@ -42,12 +42,14 @@ export default function Navbar({ profile }: NavbarProps) {
       <nav className="max-w-7xl mx-auto px-5 sm:px-8 h-16 sm:h-18 flex items-center justify-between gap-6">
         <a
           href="#home"
-          className="flex items-center gap-2.5 group shrink-0"
+          className="flex items-center gap-3 group shrink-0"
           onClick={() => setOpen(false)}
         >
-          <span className="w-9 h-9 rounded-xl bg-indigo-500 text-white flex items-center justify-center shadow-md shadow-indigo-500/25">
-            <Music className="w-4 h-4" />
-          </span>
+          <img
+            src="/logo.png"
+            alt={`${profile.brandName} emblem`}
+            className="w-10 h-10 rounded-full object-contain drop-shadow-md transition-transform group-hover:scale-105"
+          />
           <span className="font-display font-bold text-xl sm:text-2xl tracking-tight text-white">
             {firstWord}{" "}
             <span className="text-indigo-400">{restWords}</span>

@@ -142,12 +142,19 @@ export default function Hero({
 
               {/* Bottom badge + Watch */}
               <div className="absolute bottom-4 left-4 right-4 sm:bottom-5 sm:left-5 sm:right-5 flex flex-wrap items-end justify-between gap-3">
-                <div className="bg-[#111116]/90 backdrop-blur-md border border-white/15 text-white px-4 py-2.5 rounded-2xl shadow-lg">
-                  <div className="text-[10px] font-mono-meta uppercase tracking-[0.14em] text-indigo-300 font-semibold">
-                    Instructor · {profile.location}
-                  </div>
-                  <div className="font-display font-bold text-xl sm:text-2xl leading-tight">
-                    {profile.teacherName}
+                <div className="bg-[#111116]/90 backdrop-blur-md border border-white/15 text-white px-4 py-2.5 rounded-2xl shadow-lg flex items-center gap-3">
+                  <img
+                    src="/logo.png"
+                    alt={`${profile.brandName} logo`}
+                    className="w-10 h-10 rounded-full object-contain shrink-0"
+                  />
+                  <div>
+                    <div className="text-[10px] font-mono-meta uppercase tracking-[0.14em] text-indigo-300 font-semibold">
+                      Instructor · {profile.location}
+                    </div>
+                    <div className="font-display font-bold text-xl sm:text-2xl leading-tight">
+                      {profile.teacherName}
+                    </div>
                   </div>
                 </div>
 

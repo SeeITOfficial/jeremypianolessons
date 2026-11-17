@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Eye, EyeOff, Lock, Music } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Lock } from "lucide-react";
 
 interface AdminLoginProps {
   isLocalFallback: boolean;
@@ -67,10 +67,12 @@ export default function AdminLogin({
         </Link>
 
         <div className="rounded-3xl bg-slate-900 border border-slate-800 p-7 sm:p-9 shadow-2xl space-y-6">
-          <div className="flex items-center gap-3">
-            <span className="w-11 h-11 rounded-xl bg-[#4F46E5] text-white flex items-center justify-center">
-              <Music className="w-5 h-5" />
-            </span>
+          <div className="flex items-center gap-3.5">
+            <img
+              src="/logo.png"
+              alt="Jeremy Piano logo"
+              className="w-12 h-12 rounded-full object-contain shrink-0"
+            />
             <div>
               <h1 className="font-display font-bold text-3xl text-white">
                 Studio Admin

@@ -28,7 +28,8 @@ export const metadata: Metadata = {
   description:
     "Friendly 1-on-1 piano classes in Entebbe for kids, teens, and adult beginners. Learn pop, gospel, classical, and playing by ear.",
   icons: {
-    icon: "/icon.svg",
+    icon: "/logo.png",
+    apple: "/logo.png",
   },
   openGraph: {
     title: "Jeremy Piano Studio · Piano Lessons for All Ages in Entebbe",

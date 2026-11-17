@@ -15,8 +15,15 @@ export default function Footer({ profile }: FooterProps) {
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-10 border-b border-white/10">
           <div className="md:col-span-5 space-y-3">
-            <div className="font-display font-bold text-2xl">
-              {profile.brandName}
+            <div className="flex items-center gap-3">
+              <img
+                src="/logo.png"
+                alt={`${profile.brandName} logo`}
+                className="w-11 h-11 rounded-full object-contain shrink-0"
+              />
+              <div className="font-display font-bold text-2xl">
+                {profile.brandName}
+              </div>
             </div>
             <p className="text-sm text-zinc-400 max-w-sm leading-relaxed">
               Welcoming 1-on-1 piano lessons for children, teens, and adults in{" "}
