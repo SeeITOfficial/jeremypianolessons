@@ -59,6 +59,27 @@ export const metadata: Metadata = {
   },
 };
 
+const adminPwaBootstrapScript = `
+(function() {
+  try {
+    if (!window.location.pathname.startsWith("/admin")) return;
+    window.__studioInstallPrompt = window.__studioInstallPrompt || null;
+    window.addEventListener("beforeinstallprompt", function(e) {
+      e.preventDefault();
+      window.__studioInstallPrompt = e;
+      window.dispatchEvent(new Event("studio-install-ready"));
+    });
+    window.addEventListener("appinstalled", function() {
+      window.__studioInstallPrompt = null;
+      window.dispatchEvent(new Event("studio-install-done"));
+    });
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(function() {});
+    }
+  } catch (_) {}
+})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -70,6 +91,7 @@ export default function RootLayout({
       className={`${outfit.variable} ${plusJakarta.variable} ${jetbrainsMono.variable}`}
     >
       <body className="min-h-screen antialiased selection:bg-[#4F46E5]/20 selection:text-[#0F172A]">
+        <script dangerouslySetInnerHTML={{ __html: adminPwaBootstrapScript }} />
         {children}
       </body>
     </html>

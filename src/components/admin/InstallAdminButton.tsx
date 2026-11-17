@@ -8,15 +8,23 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+declare global {
+  interface Window {
+    __studioInstallPrompt?: BeforeInstallPromptEvent | null;
+  }
+}
+
 export default function InstallAdminButton() {
   const [deferredPrompt, setDeferredPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null);
+    useState<BeforeInstallPromptEvent | null>(() =>
+      typeof window !== "undefined" ? (window.__studioInstallPrompt ?? null) : null
+    );
   const [isInstalled, setIsInstalled] = useState(false);
   const [isIos, setIsIos] = useState(false);
+  const [installing, setInstalling] = useState(false);
   const [showGuideModal, setShowGuideModal] = useState(false);
 
   useEffect(() => {
-    // Register service worker for PWA installability on /admin
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").catch(() => {});
     }
@@ -34,21 +42,39 @@ export default function InstallAdminButton() {
     const ua = window.navigator.userAgent.toLowerCase();
     setIsIos(/iphone|ipad|ipod/.test(ua));
 
+    // Sync any install prompt captured before React mounted (or on login screen)
+    if (window.__studioInstallPrompt) {
+      setDeferredPrompt(window.__studioInstallPrompt);
+    }
+
+    const syncPrompt = () => {
+      if (window.__studioInstallPrompt) {
+        setDeferredPrompt(window.__studioInstallPrompt);
+      }
+    };
+
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      const promptEvent = e as BeforeInstallPromptEvent;
+      window.__studioInstallPrompt = promptEvent;
+      setDeferredPrompt(promptEvent);
     };
 
     const handleAppInstalled = () => {
+      window.__studioInstallPrompt = null;
       setIsInstalled(true);
       setDeferredPrompt(null);
       setShowGuideModal(false);
     };
 
+    window.addEventListener("studio-install-ready", syncPrompt);
+    window.addEventListener("studio-install-done", handleAppInstalled);
     window.addEventListener("beforeinstallprompt", handleBeforeInstall);
     window.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
+      window.removeEventListener("studio-install-ready", syncPrompt);
+      window.removeEventListener("studio-install-done", handleAppInstalled);
       window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
@@ -63,15 +89,51 @@ export default function InstallAdminButton() {
     );
   }
 
-  const handleClick = async () => {
-    if (deferredPrompt) {
-      await deferredPrompt.prompt();
-      const choice = await deferredPrompt.userChoice;
-      if (choice.outcome === "accepted") {
-        setIsInstalled(true);
-      }
+  const triggerPrompt = async (promptEvent: BeforeInstallPromptEvent) => {
+    await promptEvent.prompt();
+    const choice = await promptEvent.userChoice;
+    if (choice.outcome === "accepted") {
+      window.__studioInstallPrompt = null;
+      setIsInstalled(true);
       setDeferredPrompt(null);
+    }
+  };
+
+  const handleClick = async () => {
+    const activePrompt = deferredPrompt ?? window.__studioInstallPrompt ?? null;
+    if (activePrompt) {
+      await triggerPrompt(activePrompt);
       return;
+    }
+
+    // If clicked immediately on first page load while the Service Worker is
+    // finishing activation, wait briefly for beforeinstallprompt to fire.
+    if (!isIos && "serviceWorker" in navigator) {
+      setInstalling(true);
+      try {
+        await Promise.race([
+          new Promise<void>((resolve) => {
+            const onReady = () => {
+              window.removeEventListener("studio-install-ready", onReady);
+              resolve();
+            };
+            window.addEventListener("studio-install-ready", onReady);
+            navigator.serviceWorker.ready
+              .then(() => setTimeout(resolve, 600))
+              .catch(() => setTimeout(resolve, 600));
+          }),
+          new Promise<void>((resolve) => setTimeout(resolve, 1200)),
+        ]);
+
+        const delayedPrompt = window.__studioInstallPrompt ?? null;
+        if (delayedPrompt) {
+          setDeferredPrompt(delayedPrompt);
+          await triggerPrompt(delayedPrompt);
+          return;
+        }
+      } finally {
+        setInstalling(false);
+      }
     }
 
     setShowGuideModal(true);
@@ -82,10 +144,11 @@ export default function InstallAdminButton() {
       <button
         type="button"
         onClick={() => void handleClick()}
-        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold uppercase tracking-[0.1em] transition-colors cursor-pointer shadow-sm"
+        disabled={installing}
+        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-amber-400 hover:bg-amber-300 disabled:opacity-75 text-slate-950 text-xs font-bold uppercase tracking-[0.1em] transition-colors cursor-pointer shadow-sm"
       >
         <Download className="w-3.5 h-3.5" />
-        <span>Install App</span>
+        <span>{installing ? "Preparing..." : "Install App"}</span>
       </button>
 
       {showGuideModal && (
@@ -144,14 +207,20 @@ export default function InstallAdminButton() {
                 </li>
               </ol>
             ) : (
-              <p className="text-sm text-slate-300 leading-relaxed">
-                Open your browser menu (<strong>⋮</strong> or install icon in
-                the address bar) and choose{" "}
-                <strong className="text-white">
-                  Install Jeremy Studio Admin
-                </strong>{" "}
-                or <strong className="text-white">Add to Home Screen</strong>.
-              </p>
+              <div className="space-y-2.5 text-sm text-slate-300 leading-relaxed">
+                <p>
+                  This browser tab didn&apos;t allow an automatic install popup
+                  (common inside embedded preview tabs or if the app is already
+                  installed).
+                </p>
+                <p>
+                  Open this page in <strong className="text-white">Chrome</strong>{" "}
+                  or <strong className="text-white">Edge</strong> (on Android or
+                  desktop), or use the{" "}
+                  <strong className="text-white">Install icon</strong> in the
+                  browser address bar / <strong>⋮ → Install</strong>.
+                </p>
+              </div>
             )}
 
             <button

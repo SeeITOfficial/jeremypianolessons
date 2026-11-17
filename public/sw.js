@@ -7,9 +7,11 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  // Always bypass cache for API & admin requests so data stays fresh
+  // Always bypass cache for API requests so bookings & settings stay live
   if (event.request.method !== "GET" || event.request.url.includes("/api/")) {
     return;
   }
-  event.respondWith(fetch(event.request));
+  event.respondWith(
+    fetch(event.request).catch(() => caches.match(event.request))
+  );
 });
